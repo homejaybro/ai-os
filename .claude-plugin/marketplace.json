@@ -1,0 +1,11 @@
+{
+  "name": "jay-ai-os",
+  "owner": { "name": "Jay" },
+  "plugins": [
+    {
+      "name": "ai-os",
+      "source": "./plugin",
+      "description": "AI OS 開發規則：開案、設計對話、紅線、驗證、存檔把關與子 Agent"
+    }
+  ]
+}
