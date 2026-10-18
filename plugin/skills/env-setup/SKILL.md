@@ -122,7 +122,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 
 > ⚠️ **閘門僅 Windows PowerShell 生效**。Mac／Linux／WSL 環境不執行、且不報錯——需人工在 commit 前確認驗證已跑。
 
-**行為摘要**：只有「成功結束」的驗證指令才算數（Claude Code 只在指令成功時觸發記錄用的 hook，失敗的 build／測試不會留下紀錄，commit 照樣被擋）；不解析輸出內容；嚴格模式（改碼 → 跑測試 → 又改一行必須重跑）；`git push` 不攔。**只管 ai-os 專案**：repo 根目錄沒有 `_管理/常駐/此次任務.md` 就直接放行，所以不會干擾其他專案（包括 ai-os 外掛自己的資料夾）。
+**行為摘要**：只有「成功結束」的驗證指令才算數（Claude Code 只在指令成功時觸發記錄用的 hook，失敗的 build／測試不會留下紀錄，commit 照樣被擋）；不解析輸出內容；嚴格模式（改碼 → 跑測試 → 又改一行必須重跑）；`git push` 不攔。**只管用外掛開的 ai-os 專案**：repo 根目錄沒有 `_管理/常駐/此次任務.md` 就直接放行；有，但同時有 `_開發檔案/scripts/hooks/verify-gate.ps1`（用舊範本複製開的專案，自帶閘門與舊規則書）也放行，交給專案自己的閘門。所以不會干擾其他專案與舊專案。
 
 兩支腳本加一支自我測試，都在外掛的 `${CLAUDE_PLUGIN_ROOT}/scripts/`，掛在外掛的 `hooks/hooks.json`：
 

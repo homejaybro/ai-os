@@ -47,6 +47,12 @@ try {
     'doc' | Set-Content n.md
     git add n.md
     Check '6 只有文件的 commit → 放行'              'git commit -m docs'                       $false
+
+    # 舊範本複製開的專案自帶閘門 → 外掛不插手（交給專案自己的閘門）
+    git add a.js
+    New-Item -ItemType Directory -Force -Path '_開發檔案/scripts/hooks' | Out-Null
+    'x' | Set-Content '_開發檔案/scripts/hooks/verify-gate.ps1'
+    Check '10 舊範本專案（自帶閘門）→ 外掛放行'     'git commit -m x'                          $false
 }
 finally {
     Pop-Location

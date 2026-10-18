@@ -53,6 +53,7 @@ try {
         # E-1（改成外掛後）：只在 ai-os 專案寫標記，不在別的專案留下檔案
         $dir = '_管理'
         if (-not (Test-Path -LiteralPath '_管理/常駐/此次任務.md')) { exit 0 }
+        if (Test-Path -LiteralPath '_開發檔案/scripts/hooks/verify-gate.ps1') { exit 0 }   # E-2：舊範本專案自帶閘門，不插手
         Set-Content -Path (Join-Path $dir '.verify-marker') `
                     -Value (Get-Date -Format 'o') -Encoding utf8
     }

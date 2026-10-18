@@ -72,6 +72,9 @@ try {
 
     # E-1（2026-10-18，改成外掛後）：外掛對所有專案生效，只管用 ai-os 開案的專案
     if (-not (Test-Path -LiteralPath '_管理/常駐/此次任務.md')) { exit 0 }
+    # E-2（2026-10-19）：用舊範本複製開的專案自帶閘門與舊規則書，外掛不插手（避免兩套規則、閘門跑兩次）。
+    #      舊專案照遷移步驟刪掉 _開發檔案/scripts/hooks/ 後，外掛自動接手。
+    if (Test-Path -LiteralPath '_開發檔案/scripts/hooks/verify-gate.ps1') { exit 0 }
 
     # merge／rebase 進行中不擋
     if ((Test-Path '.git/MERGE_HEAD') -or (Test-Path '.git/rebase-merge') -or (Test-Path '.git/rebase-apply')) {

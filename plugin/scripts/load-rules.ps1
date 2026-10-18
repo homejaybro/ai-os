@@ -11,6 +11,8 @@ try {
     $proj = $env:CLAUDE_PROJECT_DIR
     if (-not $proj) { $proj = (Get-Location).Path }
     if (-not (Test-Path -LiteralPath (Join-Path $proj '_管理/常駐/此次任務.md'))) { exit 0 }
+    # E-2：用舊範本複製開的專案有自己的規則書（CLAUDE.md）與閘門，不再送新規則，避免兩套規則打架
+    if (Test-Path -LiteralPath (Join-Path $proj '_開發檔案/scripts/hooks/verify-gate.ps1')) { exit 0 }
 
     $rulesPath = Join-Path $PSScriptRoot '..\rules.md'
     $rules = [IO.File]::ReadAllText($rulesPath, [Text.Encoding]::UTF8)
