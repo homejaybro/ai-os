@@ -76,8 +76,11 @@ try {
     #      舊專案照遷移步驟刪掉 _開發檔案/scripts/hooks/ 後，外掛自動接手。
     if (Test-Path -LiteralPath '_開發檔案/scripts/hooks/verify-gate.ps1') { exit 0 }
 
+    # E-3（2026-10-19）：git worktree 的第二個工作資料夾裡 .git 是檔案不是資料夾，
+    #      用 git rev-parse --git-path 取真正位置，否則合併判斷與 index 時間都會失效
+    $gp = { param($n) (git rev-parse --git-path $n 2>$null) }
     # merge／rebase 進行中不擋
-    if ((Test-Path '.git/MERGE_HEAD') -or (Test-Path '.git/rebase-merge') -or (Test-Path '.git/rebase-apply')) {
+    if ((Test-Path (& $gp 'MERGE_HEAD')) -or (Test-Path (& $gp 'rebase-merge')) -or (Test-Path (& $gp 'rebase-apply'))) {
         exit 0
     }
 
@@ -114,7 +117,8 @@ try {
     if ($code.Count -eq 0) { exit 0 }
 
     # index 的 mtime ＝ 最後一次 staging 的時間（B-6／B-7 用）
-    $indexTime = if (Test-Path '.git/index') { (Get-Item '.git/index').LastWriteTimeUtc } else { [DateTime]::MinValue }
+    $indexPath = & $gp 'index'
+    $indexTime = if ($indexPath -and (Test-Path -LiteralPath $indexPath)) { (Get-Item -LiteralPath $indexPath).LastWriteTimeUtc } else { [DateTime]::MinValue }
     $dirty = @(git -c core.quotepath=false diff --name-only 2>$null)
 
     $newest   = [DateTime]::MinValue
