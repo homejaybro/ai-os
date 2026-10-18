@@ -160,7 +160,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME/ai-os/plugin/scripts/gate-test.ps1"
 ```
-要「全部通過」。涵蓋：未驗證的程式碼 commit 擋下、commit 訊息裡的驗證字樣不算驗證、`git push` 與非 commit 指令放行、只有文件的 commit 放行、同串先 build 再 commit 放行、`git add` 與 commit 寫在同一串仍擋下、不是 ai-os 專案就放行。
+要「全部通過」。涵蓋：未驗證的程式碼 commit 擋下、commit 訊息裡的驗證字樣不算驗證、`git push` 與非 commit 指令放行、只有文件的 commit 放行、同串先 build 再 commit 放行、`git add` 與 commit 寫在同一串仍擋下、不是 ai-os 專案就放行、舊範本專案（自帶閘門）放行。
 
 手動測單一情境（在一個有 `_管理/常駐/此次任務.md` 的臨時 git repo 裡，把 JSON 餵給腳本）：
 ```powershell
