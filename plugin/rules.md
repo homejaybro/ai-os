@@ -1,6 +1,6 @@
 # AI OS 共用規則
 
-<!-- 給維護的人：這份由 ai-os 外掛提供，每個 ai-os 專案的 CLAUDE.md 用 @~/ai-os/plugin/rules.md 載入，改這裡＝所有專案一起改。
+<!-- 給維護的人：這份由 ai-os 外掛提供，由 hooks/hooks.json 的 SessionStart（scripts/load-rules.ps1）在 ai-os 專案開對話時送進對話，改這裡＝所有專案一起改。註解不會送出。
      規則背後的理由與取捨見 ~/ai-os/設計說明.md。官方建議 CLAUDE.md 少於 200 行、只放「每次都用得到」的事；多步驟程序放 skill，需要時才讀。
      新增規則前先問：拿掉這行，Claude 會做錯嗎？不會就別加。 -->
 

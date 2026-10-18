@@ -32,7 +32,7 @@ codegraph --version
 
 依技術棧追加：Python 專案要 Python 3.10+（安裝時勾選 Add to PATH，內含 pip／venv）；用 Supabase 時要 `npm install -g supabase`。
 
-**裝 ai-os 外掛**（共用規則、技能、子 Agent、commit 閘門都在裡面）：把 ai-os 資料夾放到使用者家目錄下的 `ai-os`（從 GitHub 下載或從舊電腦複製；位置要一樣，因為每個專案的 CLAUDE.md 都用 `@~/ai-os/plugin/rules.md` 載入），然後：
+**裝 ai-os 外掛**（共用規則、技能、子 Agent、commit 閘門都在裡面）：把 ai-os 資料夾放到使用者家目錄下的 `ai-os`（從 GitHub 下載或從舊電腦複製；放在家目錄的 `ai-os` 最好，文件裡的路徑都照這個寫），然後：
 ```bash
 claude plugin marketplace add ~/ai-os
 claude plugin install ai-os@jay-ai-os

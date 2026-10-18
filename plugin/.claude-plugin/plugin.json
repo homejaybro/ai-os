@@ -1,6 +1,6 @@
 {
   "name": "ai-os",
   "displayName": "AI OS",
-  "description": "AI OS 開發規則：開案、設計對話、紅線、驗證、存檔把關與子 Agent。專案的 CLAUDE.md 用 @~/ai-os/plugin/rules.md 載入主規則。",
+  "description": "AI OS 開發規則：開案、設計對話、紅線、驗證、存檔把關與子 Agent。ai-os 專案開對話時自動載入共用規則。",
   "author": { "name": "Jay" }
 }

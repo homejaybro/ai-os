@@ -20,8 +20,8 @@ description: 用 ai-os 開一個新專案。使用者在空資料夾（或剛建
    ```bash
    cp -rn "${CLAUDE_PLUGIN_ROOT}/templates/project/." .
    ```
-   會得到：`CLAUDE.md`（只有一行 `@~/ai-os/plugin/rules.md` 載入共用規則）、`_管理/常駐/` 四個常駐檔、`_管理/開案確認.md`、`_管理/specs/`、`_產出/`、`_開發檔案/tests/e2e/`、`.gitignore`、`.mcp.json`、`playwright.config.ts`、`.github/workflows/test.yml`、`.claude/settings.json`。
-2. **讀完 `${CLAUDE_PLUGIN_ROOT}/rules.md` 全文**，這個對話接下來照它做。剛建立的 `CLAUDE.md` 要等重開 Claude Code 才會自動載入，所以這次要自己讀。
+   會得到：`CLAUDE.md`（專案專屬補充；共用規則由外掛在開對話時自動載入）、`_管理/常駐/` 四個常駐檔、`_管理/開案確認.md`、`_管理/specs/`、`_產出/`、`_開發檔案/tests/e2e/`、`.gitignore`、`.mcp.json`、`playwright.config.ts`、`.github/workflows/test.yml`、`.claude/settings.json`。
+2. **讀完 `${CLAUDE_PLUGIN_ROOT}/rules.md` 全文**，這個對話接下來照它做。共用規則要從下一次開對話起才會自動載入（外掛在開對話時檢查有沒有 `_管理/常駐/此次任務.md`），所以這次要自己讀。
 
 ## 2. 討論與規格
 
@@ -39,6 +39,6 @@ description: 用 ai-os 開一個新專案。使用者在空資料夾（或剛建
 
 告訴使用者（一次一步）：
 1. 把 Claude Code 關掉再開這個資料夾。
-2. 會跳出「允許讀取外部檔案」的確認框——這是專案要載入 ai-os 共用規則，請選允許。選了不允許的話，共用規則不會生效。
+2. 第一次在這個資料夾開新對話時，會出現「此工作區未受信任」提示：照常送出訊息，跳出詢問時選「信任工作區」。
 3. 輸入 `/mcp`，確認 codegraph（和這次追加的 MCP）都在清單裡。
 4. 回一句「重開了」，就從第一個功能開始做。
