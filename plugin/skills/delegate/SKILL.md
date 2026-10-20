@@ -35,7 +35,7 @@ description: ai-os 專案決定要派子 Agent（ai-os:builder／tester／review
 | 子 Agent | 驗證通過才 `git add <明確檔案清單>`（不用 `git add -A`），**不 commit**；驗證失敗連 add 都不做 |
 | 主 Agent | `git diff --cached --name-only` 看子 Agent 動了哪些檔，有不相干的就問清楚；需要的驗證都過了才統一 commit |
 
-這樣未過關的版本不會進 git 歷史（理由見 `~/ai-os/設計說明.md`）。
+這樣未過關的版本不會進 git 歷史（理由見外掛倉庫根目錄的 `設計說明.md`）。
 
 ## 派 reviewer 前
 

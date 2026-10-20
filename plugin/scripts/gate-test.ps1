@@ -1,5 +1,5 @@
 ﻿# 閘門自我測試：在暫存 git repo 裡實跑 verify-gate.ps1，確認各情境行為正確。
-# 用法：powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME/ai-os/plugin/scripts/gate-test.ps1"
+# 用法：在外掛的 scripts 資料夾執行 powershell -NoProfile -ExecutionPolicy Bypass -File gate-test.ps1
 # 全過 exit 0；有任何一項不符 exit 1。⚠️ 須存 UTF-8 with BOM。
 
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)

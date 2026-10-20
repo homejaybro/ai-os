@@ -19,7 +19,7 @@ try {
     $rules = [regex]::Replace($rules, '<!--[\s\S]*?-->\s*', '')   # 給維護者的註解不送
 
     $ctx = "這個資料夾是 AI OS 專案（有 _管理/常駐/此次任務.md）。以下是 AI OS 共用規則，由 ai-os 外掛在開對話時載入，" +
-           "內容與 ~/ai-os/plugin/rules.md 相同，作用等同本專案的 CLAUDE.md：`n`n" + $rules
+           "內容即 ai-os 外掛的 rules.md，作用等同本專案的 CLAUDE.md：`n`n" + $rules
 
     @{
         hookSpecificOutput = @{

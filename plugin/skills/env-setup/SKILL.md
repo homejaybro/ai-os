@@ -32,12 +32,7 @@ codegraph --version
 
 依技術棧追加：Python 專案要 Python 3.10+（安裝時勾選 Add to PATH，內含 pip／venv）；用 Supabase 時要 `npm install -g supabase`。
 
-**裝 ai-os 外掛**（共用規則、技能、子 Agent、commit 閘門都在裡面）：把 ai-os 資料夾放到使用者家目錄下的 `ai-os`（從 GitHub 下載或從舊電腦複製；放在家目錄的 `ai-os` 最好，文件裡的路徑都照這個寫），然後：
-```bash
-claude plugin marketplace add ~/ai-os
-claude plugin install ai-os@jay-ai-os
-```
-重開 Claude Code 後，`/plugin` 裡應看到 ai-os 已啟用。
+**ai-os 外掛本身**的安裝與更新步驟在外掛 GitHub 倉庫的 `README.md`（能讀到這份技能，代表已經裝好）。目前只支援 Windows：自動載入規則、每回合提醒、存檔把關都是 PowerShell 腳本。
 
 ---
 
@@ -158,13 +153,13 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 ### 改完必測
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME/ai-os/plugin/scripts/gate-test.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/scripts/gate-test.ps1"
 ```
 要「全部通過」。涵蓋：未驗證的程式碼 commit 擋下、commit 訊息裡的驗證字樣不算驗證、`git push` 與非 commit 指令放行、只有文件的 commit 放行、同串先 build 再 commit 放行、`git add` 與 commit 寫在同一串仍擋下、不是 ai-os 專案就放行、舊範本專案（自帶閘門）放行。
 
 手動測單一情境（在一個有 `_管理/常駐/此次任務.md` 的臨時 git repo 裡，把 JSON 餵給腳本）：
 ```powershell
-'{"tool_name":"Bash","tool_input":{"command":"git commit -m \"x\""}}' | powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME/ai-os/plugin/scripts/verify-gate.ps1"
+'{"tool_name":"Bash","tool_input":{"command":"git commit -m \"x\""}}' | powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/scripts/verify-gate.ps1"
 ```
 輸出含 `"deny"` ＝ 擋下；無輸出 ＝ 放行。
 
