@@ -29,7 +29,8 @@
 1. `claude plugin validate ./plugin`
 2. 動到 `scripts/` → 跑 `powershell -NoProfile -ExecutionPolicy Bypass -File plugin/scripts/gate-test.ps1`，要「全部通過」
 3. 動到規則、技能或範本 → 在臨時資料夾複製 `templates/project/` 建一個 ai-os 專案，用 `claude -p` 實測行為，測完刪除
-4. `git commit`，第一行用白話說「這版改了什麼」
+4. `git commit`，第一行用白話說「這版改了什麼」，然後 `git push`（其他電腦靠 GitHub 上的版本更新）
+5. 安裝方式、指令名稱或使用方式有變 → 同步改 `README.md`
 
 ## 回報
 
