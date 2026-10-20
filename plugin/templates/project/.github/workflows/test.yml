@@ -23,7 +23,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # 指令依專案 STACK_RULES 調整；--if-present 讓沒有該 script 的專案自動略過
+      # 指令依 STACK_RULES 調整
       - name: Typecheck
         run: npm run typecheck --if-present
 
@@ -32,8 +32,7 @@ jobs:
 
       - name: Build
         run: npm run build
-        # 需要環境變數時，取消下面的註解（值在 GitHub repo Settings > Secrets 設定）。
-        # 不要只留 env: 而底下沒有任何值，GitHub 可能判定設定檔格式錯誤。
+        # 需要環境變數時取消註解（值在 GitHub repo Settings > Secrets 設定）；不要只留 env: 而底下沒有值
         # env:
         #   NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         #   NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}

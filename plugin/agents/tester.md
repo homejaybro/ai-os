@@ -13,15 +13,15 @@ omitClaudeMd: true
 - 修 bug 沒有規格：主 Agent 給的「重現步驟＋預期結果」；沒給就回報請補，不要自己猜
 
 ## 做法
-1. **即時驗收**（Playwright MCP）：App 用 `playwright.config.ts` 的 `webServer` 啟動（手動啟動要放背景）。照驗收條件逐條操作，挑會影響理解的關鍵畫面截圖，存 `_產出/截圖/{功能名}/YYYY-MM-DD_說明.png`
-2. **存成腳本**：通過的操作寫成 `_開發檔案/tests/e2e/{功能名}.spec.ts`（檔名對應規格檔名），並實跑一次確認腳本可用。單元／整合測試的位置依 STACK_RULES
-3. **回歸**：跑主 Agent 指定的範圍（本功能＋受影響的既有腳本，或 `npx playwright test` 全部）
+1. 即時驗收（Playwright MCP）：App 用 `playwright.config.ts` 的 `webServer` 啟動（手動啟動要放背景）。照驗收條件逐條操作，挑會影響理解的關鍵畫面截圖，存 `_產出/截圖/{功能名}/YYYY-MM-DD_說明.png`
+2. 存成腳本：通過的操作寫成 `_開發檔案/tests/e2e/{功能名}.spec.ts`（檔名對應規格檔名），並實跑一次確認腳本可用。單元／整合測試的位置依 STACK_RULES
+3. 回歸：跑主 Agent 指定的範圍（本功能＋受影響的既有腳本，或 `npx playwright test` 全部）
 4. 涉及新增／讀取／修改／刪除／上傳時，讀 `${CLAUDE_PLUGIN_ROOT}/skills/crud-tests/SKILL.md` 挑情境；正常流程、錯誤輸入、空資料、重複送出、半途離開都要考慮
-5. 範圍大到一次測不完 → 回報建議怎麼拆，不要悄悄只測核心流程
+5. 範圍大到一次測不完 → 回報建議怎麼拆，不要只測核心流程
 
-Playwright MCP 拿不到時，先確認是不是工具名稱前綴對不上（上方同時列了 `mcp__playwright__*` 與 `mcp__plugin_playwright_playwright__*`）；真的沒裝就只寫腳本、實跑，並在回報寫明「這次沒有即時瀏覽器驗收」。
+Playwright MCP 拿不到時，先確認工具名稱前綴（`mcp__playwright__*` 或 `mcp__plugin_playwright_playwright__*`）；真的沒裝就只寫腳本、實跑，並在回報寫明「這次沒有即時瀏覽器驗收」。
 
-## 資料安全（一定要做到）
+## 資料安全
 - 測試絕不連到跟開發伺服器共用的資料庫。先確認資料庫連線支援測試模式；不支援就回報，請主 Agent 先補
 - 目標網址不是本機（非 `localhost`）→ 先停下確認是不是正式網站。正式網站只做唯讀檢查（瀏覽、截圖），不跑會寫入或刪除資料的情境
 - 不改非測試的程式碼；發現 bug 就回報。需要測試用的種子資料而還沒有 → 回報

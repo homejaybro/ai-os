@@ -18,7 +18,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // 開案後依技術棧填入啟動指令，例如 Next.js：
+  // 開案時依 STACK_RULES 填入，例如 Next.js：
   // webServer: {
   //   command: 'npm run dev',
   //   url: 'http://localhost:3000',
