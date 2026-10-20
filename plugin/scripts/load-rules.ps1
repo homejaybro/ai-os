@@ -1,6 +1,6 @@
 ﻿# SessionStart hook：在 ai-os 專案開對話時，把共用規則（rules.md）送進對話
 #
-# 為什麼不用專案 CLAUDE.md 的 @~/ai-os/plugin/rules.md 匯入：匯入外部檔案要使用者在確認框核准，
+# 為什麼不用專案 CLAUDE.md 的 @<外掛路徑>/rules.md 匯入：匯入外部檔案要使用者在確認框核准，
 # 但 Claude 桌面版不會跳出這個確認框（2026-10-19 實測：hasClaudeMdExternalIncludesWarningShown 一直是 false），
 # 匯入因此永遠不生效。hook 送進來的內容不需要核准，也只在 ai-os 專案觸發。
 # matcher 設 startup|clear|compact：開新對話、/clear、壓縮後都重送；resume 時對話紀錄裡已經有，不重送。

@@ -110,7 +110,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 
 1. 必須存成 UTF-8 with BOM，否則 Windows PowerShell 5.1 解析失敗、閘門默默失效。存檔後補 BOM：
    ```powershell
-   $p = "$HOME\ai-os\plugin\scripts\verify-gate.ps1"
+   $p = "${CLAUDE_PLUGIN_ROOT}/scripts/verify-gate.ps1"
    $c = Get-Content -Raw -Encoding UTF8 $p
    [System.IO.File]::WriteAllText($p, $c, (New-Object System.Text.UTF8Encoding($true)))
    ```
