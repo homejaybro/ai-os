@@ -4,7 +4,7 @@
 # 但 Claude 桌面版不會跳出這個確認框（2026-10-19 實測：hasClaudeMdExternalIncludesWarningShown 一直是 false），
 # 匯入因此永遠不生效。hook 送進來的內容不需要核准，也只在 ai-os 專案觸發。
 # matcher 設 startup|clear|compact：開新對話、/clear、壓縮後都重送；resume 時對話紀錄裡已經有，不重送。
-# 失敗行為：任何錯誤都不送（exit 0），錯誤寫進 %TEMP%\ai-os-gate-error.log。⚠️ 須存 UTF-8 with BOM。
+# 失敗行為：任何錯誤都不 throw（exit 0），錯誤寫進 %TEMP%\ai-os-gate-error.log；確定是 ai-os 專案時另送一段提示，叫 Claude 先告知使用者規則沒載入。⚠️ 須存 UTF-8 with BOM。
 
 try {
     [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
@@ -36,7 +36,7 @@ try {
             @{
                 hookSpecificOutput = @{
                     hookEventName     = 'SessionStart'
-                    additionalContext = '⚠️ ai-os 共用規則載入失敗，本次對話沒有規則。回覆的第一句先告訴使用者「規則沒載入，建議關掉重開對話；仍失敗請看 %TEMP%\ai-os-gate-error.log」，再回答他的問題。'
+                    additionalContext = '⚠️ ai-os 共用規則載入失敗，本次對話沒有規則。回覆的第一句先告訴使用者「規則沒載入，建議關掉重開對話；仍失敗我可以幫你讀錯誤紀錄（%TEMP%\ai-os-gate-error.log）」；規則恢復前，不做資料庫、部署、刪除類操作，其餘再回答他的問題。'
                 }
             } | ConvertTo-Json -Depth 5 -Compress
         } catch { }

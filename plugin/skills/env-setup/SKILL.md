@@ -69,7 +69,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 
 ### 環境變數與金鑰隔離
 
-任何串接第三方服務的金鑰／連線字串（資料庫、金流、email/簡訊/推播、外部 AI API），STACK_RULES 要註明 dev/test/prod 各自的取得方式。
+任何串接第三方服務的金鑰／連線字串（資料庫、金流、email/簡訊/推播、外部 AI API），金鑰一律不寫死、由環境變數決定；資料庫何時分測試庫見共用規則「資料安全的固定做法」，金流等第三方服務任何階段都要有測試金鑰；STACK_RULES 註明各自的取得方式。
 
 執行會產生真實副作用的操作前（送出 API 請求、跑 migration、發送通知、扣款），無法從當下 context 判斷用的是哪個環境的金鑰 → 停下回報，不假設是安全的（紅線第 7 項）。
 
@@ -108,7 +108,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 ### 閘門異常時
 
 1. 腳本出錯會寫進 `%TEMP%\ai-os-gate-error.log`，閘門行為可疑時先看這個檔。
-2. 某個技術棧的測試指令不被認可、每次 commit 都被擋 → 不要繞過，回報使用者：要到外掛的 `mark-verify.ps1`、`verify-gate.ps1` 追加該指令的 pattern（在外掛倉庫改，不在專案裡改）。
+2. 某個技術棧的測試指令不被認可、每次 commit 都被擋 → 不要繞過，回報使用者：可先把該指令寫進 `package.json` 的 `test` script、改用 `npm test` 執行；長期要到外掛的 `mark-verify.ps1`、`verify-gate.ps1` 追加該指令的 pattern（在外掛倉庫改，不在專案裡改）。
 
 ### 已知的設計取捨（不是 bug）
 

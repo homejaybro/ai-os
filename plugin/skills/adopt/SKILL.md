@@ -29,7 +29,7 @@ git 指令一律 `rtk proxy git -c core.quotepath=false ...`（RTK 會改寫 dif
 
 - 沒有 git → 先把整個資料夾複製一份到旁邊當備份（依賴目錄 `node_modules`、`.venv` 不複製），再 `git init -b main`；`.gitignore` 先排除機密與依賴目錄；超過 50MB 的檔列給使用者看（GitHub 上限 100MB）；以現況做第一次 commit。
 - `git tag backup-YYYYMMDD-HHMM`、`git checkout -b adopt-ai-os`。
-- 跑一次建置、型別檢查、單元測試，記下結果當基準。需要登入或真實資料庫的測試不跑。沒有任何測試或建置指令 → 基準改用「主要畫面或指令能正常啟動」。
+- 跑一次建置、型別檢查、單元測試，記下結果當基準。需要登入或真實資料庫的測試不跑。問清楚專案是否已上線、有沒有真資料，把結果記進 STACK_RULES「環境與金鑰」（有真資料就記「已過界線」）。沒有任何測試或建置指令 → 基準改用「主要畫面或指令能正常啟動」。
 
 ## 3. 盤點並決定去處（動手改檔前完成）
 
