@@ -19,6 +19,7 @@
 - `rules.md` 去掉註解後要少於 10,000 字（hook 上限，超過會被截斷）。
 - `.ps1` 一律存 UTF-8 with BOM；讀 stdin 要設 UTF-8 並去掉 BOM。
 - 三支 hook 腳本的判斷條件要一致：有 `_管理/常駐/此次任務.md`、且沒有 `_開發檔案/scripts/hooks/verify-gate.ps1`。
+- 閘門腳本：`hooks.json` 的 matcher 要同時含 `Bash` 與 `PowerShell`；腳本要設 `[Console]::OutputEncoding` 為 UTF-8，並 `Set-Location` 到 repo 根；新增技術棧要在 `mark-verify.ps1`、`verify-gate.ps1` 追加驗證指令 pattern。
 - 路徑寫法：不寫任何只存在某台電腦的路徑（換電腦、換帳號要能用）。技能、子 Agent、腳本內用 `${CLAUDE_PLUGIN_ROOT}`；`templates/project/` 會被複製進專案，裡面不寫外掛路徑，用技能名稱（如 `ai-os:brainstorming`）指過去。改完跑一次掃描確認沒有本機路徑殘留。
 - 子 Agent 設了 `omitClaudeMd`，看不到共用規則，紅線要寫在自己的檔內。
 - 改名稱或路徑後，全資料夾搜尋舊字串，0 殘留。

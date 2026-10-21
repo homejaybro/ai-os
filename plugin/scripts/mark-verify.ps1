@@ -38,7 +38,7 @@ try {
     # 驗證類指令（跨技術棧；新增技術棧時在此追加）
     $verifyPattern = '(npm|yarn|pnpm)\s+(run\s+)?(build|test|lint|typecheck|check)' +
                      '|(^|\s|&&\s*)tsc(\s|$)' +
-                     '|playwright\s+test|\bvitest\b|\bjest\b|\bmocha\b' +
+                     '|playwright\s+test|\bvitest\b|\bjest\b|\bmocha\b|\bnode\s+--test\b' +
                      '|\bpytest\b|\bpy_compile\b|\bmypy\b|\bruff\b|\bflake8\b' +
                      '|cargo\s+(build|test|check|clippy)' +
                      '|go\s+(build|test|vet)' +

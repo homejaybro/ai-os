@@ -1,6 +1,6 @@
 ---
 name: env-setup
-description: ai-os 專案遇到這些情況時讀：新電腦要裝工具（Node、Git、RTK、CodeGraph、ai-os 外掛）、開案初始化的版控規範、依技術棧追加 MCP、工具失效要降級、commit 閘門（存檔把關 hook）行為異常或要維護。
+description: ai-os 專案遇到這些情況時讀：新電腦要裝工具（Node、Git、RTK、CodeGraph、ai-os 外掛）、開案初始化的版控規範、依技術棧追加 MCP、工具失效要降級、commit 閘門（存檔把關 hook）行為異常。
 ---
 
 # 環境與版控
@@ -94,7 +94,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 
 工具可以降級，原則不可以：CodeGraph 掛了照樣用 Grep 查誰在用；Playwright MCP 掛了驗證證據照樣要附實跑結果。
 
-## 四、commit 閘門（hook）維護須知
+## 四、commit 閘門（hook）
 
 行為：只有成功結束的驗證指令才算數（失敗的 build／測試不留紀錄，commit 照樣被擋）；不解析輸出內容；嚴格模式（改碼 → 跑測試 → 又改一行必須重跑）；`git push` 不攔。repo 根目錄沒有 `_管理/常駐/此次任務.md`，或有 `_開發檔案/scripts/hooks/verify-gate.ps1`（舊範本專案，自帶閘門）→ 直接放行。
 
@@ -104,21 +104,11 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 |---|---|---|
 | `mark-verify.ps1` | PostToolUse (Bash／PowerShell，背景執行) | 偵測到驗證類指令 → 寫專案的 `_管理/.verify-marker` |
 | `verify-gate.ps1` | PreToolUse (Bash／PowerShell) | `git commit` 前檢查標記是否比最新 staged 程式碼檔更新 |
-| `gate-test.ps1` | — | 在暫存 repo 實跑各情境的自我測試 |
 
-### 改這些腳本時的陷阱
+### 閘門異常時
 
-1. 必須存成 UTF-8 with BOM，否則 Windows PowerShell 5.1 解析失敗、閘門默默失效。存檔後補 BOM：
-   ```powershell
-   $p = "${CLAUDE_PLUGIN_ROOT}/scripts/verify-gate.ps1"
-   $c = Get-Content -Raw -Encoding UTF8 $p
-   [System.IO.File]::WriteAllText($p, $c, (New-Object System.Text.UTF8Encoding($true)))
-   ```
-2. `[Console]::OutputEncoding` 要設 UTF-8，否則擋下訊息的中文變亂碼。
-3. 新增技術棧要到 `mark-verify.ps1` 與 `verify-gate.ps1` 追加驗證指令 pattern，否則該棧的測試不被認可、每次 commit 都被擋。
-4. `hooks.json` 用 `${CLAUDE_PLUGIN_ROOT}` 指到腳本；腳本內要 `Set-Location (git rev-parse --show-toplevel)`，否則 cwd 不在專案根時默默放行。
-5. 兩支腳本都要設 `[Console]::InputEncoding` 為 UTF-8，讀 stdin 後先去掉開頭 BOM（`$raw.TrimStart([char]0xFEFF)`），否則中文指令或 JSON 解析失敗 → 漏寫標記或默默放行。腳本出錯會寫進 `%TEMP%\ai-os-gate-error.log`，閘門行為可疑時先看這個檔。
-6. hook 的 `matcher` 要同時涵蓋 `Bash` 與 `PowerShell`，只寫 `Bash` 閘門會整個不作用且沒有錯誤。
+1. 腳本出錯會寫進 `%TEMP%\ai-os-gate-error.log`，閘門行為可疑時先看這個檔。
+2. 某個技術棧的測試指令不被認可、每次 commit 都被擋 → 不要繞過，回報使用者：要到外掛的 `mark-verify.ps1`、`verify-gate.ps1` 追加該指令的 pattern（在外掛倉庫改，不在專案裡改）。
 
 ### 已知的設計取捨（不是 bug）
 
@@ -128,19 +118,6 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 | stage 之後又動工作區導致 commit 被擋 | 閘門保守判斷，正解是重跑驗證 |
 | `_管理/`／`.claude/`／`.github/` 下一律放行 | 例外：`.ps1/.sh/.py/.js/.ts` 等可執行腳本仍視為程式碼 |
 | 每次指令都會啟動 PowerShell 跑閘門（約 0.3 秒）| 不用 hook 的 `if` 欄位過濾：`if: "Bash(git *)"` 抓不到 `rtk proxy git commit`。RTK hook：Bash 由全域設定負責，專案 `.claude/settings.json` 只掛 PowerShell，避免處理兩次 |
-
-### 改完必測
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/scripts/gate-test.ps1"
-```
-要「全部通過」。涵蓋：未驗證的程式碼 commit 擋下、commit 訊息裡的驗證字樣不算驗證、`git push` 與非 commit 指令放行、只有文件的 commit 放行、同串先 build 再 commit 放行、`git add` 與 commit 寫在同一串仍擋下、不是 ai-os 專案就放行、舊範本專案放行。
-
-手動測單一情境（在有 `_管理/常駐/此次任務.md` 的臨時 git repo 裡）：
-```powershell
-'{"tool_name":"Bash","tool_input":{"command":"git commit -m \"x\""}}' | powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/scripts/verify-gate.ps1"
-```
-輸出含 `"deny"` ＝ 擋下；無輸出 ＝ 放行。
 
 ## 五、自動放行的指令
 

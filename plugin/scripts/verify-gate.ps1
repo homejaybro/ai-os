@@ -59,7 +59,7 @@ try {
     #   B-9：先去掉引號內文字、驗證字樣加字詞邊界——commit message 寫「新增 playwright test」「majestic」不能算驗證
     $cmdNoQuotes = [regex]::Replace($cmd, '"[^"]*"|''[^'']*''', '')
     $verifyPattern = '(npm|yarn|pnpm)\s+(run\s+)?(build|test|lint|typecheck|check)' +
-                     '|(^|\s|&&\s*)tsc(\s|$)|playwright\s+test|\bvitest\b|\bjest\b|\bmocha\b' +
+                     '|(^|\s|&&\s*)tsc(\s|$)|playwright\s+test|\bvitest\b|\bjest\b|\bmocha\b|\bnode\s+--test\b' +
                      '|\bpytest\b|\bpy_compile\b|\bmypy\b|\bruff\b|\bflake8\b' +
                      '|cargo\s+(build|test|check|clippy)|go\s+(build|test|vet)' +
                      '|dotnet\s+(build|test)|mvn\s+(compile|test)|gradle\s+(build|test)'
