@@ -13,6 +13,7 @@ try {
     if (-not (Test-Path -LiteralPath (Join-Path $proj '_管理/常駐/此次任務.md'))) { exit 0 }
     # E-2：用舊範本複製開的專案有自己的規則書（CLAUDE.md）與閘門，不再送新規則，避免兩套規則打架
     if (Test-Path -LiteralPath (Join-Path $proj '_開發檔案/scripts/hooks/verify-gate.ps1')) { exit 0 }
+    $isAiOs = $true
 
     $rulesPath = Join-Path $PSScriptRoot '..\rules.md'
     $rules = [IO.File]::ReadAllText($rulesPath, [Text.Encoding]::UTF8)
@@ -29,5 +30,16 @@ try {
     } | ConvertTo-Json -Depth 5 -Compress
 } catch {
     try { Add-Content -Path (Join-Path $env:TEMP 'ai-os-gate-error.log') -Value "$(Get-Date -Format o) load-rules: $_" -Encoding utf8 } catch { }
+    # 確定是 ai-os 專案才提醒：規則沒載入時，開頭先告訴使用者，避免無規則地開工
+    if ($isAiOs) {
+        try {
+            @{
+                hookSpecificOutput = @{
+                    hookEventName     = 'SessionStart'
+                    additionalContext = '⚠️ ai-os 共用規則載入失敗，本次對話沒有規則。回覆的第一句先告訴使用者「規則沒載入，建議關掉重開對話；仍失敗請看 %TEMP%\ai-os-gate-error.log」，再回答他的問題。'
+                }
+            } | ConvertTo-Json -Depth 5 -Compress
+        } catch { }
+    }
 }
 exit 0
