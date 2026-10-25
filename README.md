@@ -31,7 +31,7 @@ claude plugin install ai-os@jay-ai-os
 | 加新功能 | 直接描述，或輸入 `/ai-os:brainstorming` |
 | 暫停使用 | 「自訂」→「外掛程式」→ AI OS 右邊「⋮」→ 停用 |
 
-建議另外安裝的工具（Node.js、RTK、CodeGraph）與用法，開好專案後問 Claude「新電腦要裝什麼」即可。
+開案時 Claude 會先檢查 Node.js、Git、CodeGraph（必要）和 RTK（建議），缺了會一步一步帶你安裝；全都有就不會多問。
 
 ## 更新規則
 

@@ -14,13 +14,14 @@ description: 用 ai-os 開一個新專案。使用者在空資料夾（或剛建
 - 已有程式碼或其他專案檔（`.git`、`.claude/` 以外）→ 不是新案。告訴使用者這套開案流程只用於新專案，既有專案要先探索、再規劃。不複製任何檔案。
 - 空資料夾 → 從第 1 步開始。
 
-## 1. 建骨架、載入共用規則
+## 1. 環境檢查、建骨架、載入共用規則
 
-1. 複製專案骨架（不覆蓋已存在的檔）：
+1. 跑 `node --version`、`git --version`、`codegraph --version`、`rtk --version`。node（v18 以上）、git、codegraph 缺任何一個 → 停下，照 `ai-os:env-setup` 第〇節一次教一個，裝好重新檢查才往下。只有 rtk 缺 → 提醒一次「建議裝、不裝也能用」，不擋。全都有就不提。
+2. 複製專案骨架（不覆蓋已存在的檔）：
    ```bash
    cp -rn "${CLAUDE_PLUGIN_ROOT}/templates/project/." .
    ```
-2. 讀完 `${CLAUDE_PLUGIN_ROOT}/rules.md` 全文，這個對話接下來照它做（共用規則要到下次開對話才會自動載入）。
+3. 讀完 `${CLAUDE_PLUGIN_ROOT}/rules.md` 全文，這個對話接下來照它做（共用規則要到下次開對話才會自動載入）。
 
 ## 2. 討論與規格
 
