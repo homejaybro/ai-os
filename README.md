@@ -5,7 +5,7 @@ Claude Code 外掛：讓 Claude 用同一套規則開發專案——先問清楚
 ## 安裝（新電腦或另一個 Claude 帳號）
 
 需要：Windows、已安裝 Claude Code（桌面版或終端機版）、Git。
-這是私人倉庫：安裝的電腦要能用有權限的 GitHub 帳號存取它（第一次可能跳出 GitHub 登入）。要給別的 GitHub 帳號用，先在倉庫的 Settings → Collaborators 邀請對方，或把倉庫改成公開。
+這是公開倉庫：任何人都能照下面步驟安裝，不需要 GitHub 帳號。
 
 **桌面版**
 1. 左下角進入「自訂」→「外掛程式」。
