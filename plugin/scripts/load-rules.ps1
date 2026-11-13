@@ -10,7 +10,25 @@ try {
     [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
     $proj = $env:CLAUDE_PROJECT_DIR
     if (-not $proj) { $proj = (Get-Location).Path }
-    if (-not (Test-Path -LiteralPath (Join-Path $proj '_管理/常駐/此次任務.md'))) { exit 0 }
+    if (-not (Test-Path -LiteralPath (Join-Path $proj '_管理/常駐/此次任務.md'))) {
+        # 空資料夾（只有 .git、.claude 也算）：提醒 Claude 新開發走開案、改既有倉庫先接上規則，不用等使用者講出「開案」
+        $items = @(Get-ChildItem -LiteralPath $proj -Force -ErrorAction Stop | Where-Object { $_.Name -notin @('.git', '.claude', 'desktop.ini', 'Thumbs.db') })
+        if ($items.Count -gt 0) { exit 0 }
+        $hint = '這是空資料夾，裝有 ai-os 外掛（給新專案用的開發規則）。依使用者第一則訊息判斷：' +
+                '①要開發新的東西（網站、App、工具、腳本等），不論有沒有說「開案」→ 先用 ai-os:start-project 技能，不直接寫程式。' +
+                '②要修改既有的 GitHub 倉庫 → 把它下載到這個資料夾本身（git clone <網址> .；資料夾不是全空時改用 git init、git remote add origin <網址>、git pull origin <預設分支>），不要開案；' +
+                '下載後有 _管理/常駐/此次任務.md → 讀完 ${CLAUDE_PLUGIN_ROOT}/rules.md 全文並照它做，做完提醒使用者之後開新對話規則會自動載入；' +
+                '沒有 → 告訴使用者這個倉庫不歸 ai-os 管，可以直接改，或輸入 /ai-os:adopt 改由 ai-os 管理，讓他選。' +
+                '③其他（問問題、看檔案、使用者說不用開案）→ 照常回答。'
+        $hint = $hint.Replace('${CLAUDE_PLUGIN_ROOT}', (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
+        @{
+            hookSpecificOutput = @{
+                hookEventName     = 'SessionStart'
+                additionalContext = $hint
+            }
+        } | ConvertTo-Json -Depth 5 -Compress
+        exit 0
+    }
     # E-2：用舊範本複製開的專案有自己的規則書（CLAUDE.md）與閘門，不再送新規則，避免兩套規則打架
     if (Test-Path -LiteralPath (Join-Path $proj '_開發檔案/scripts/hooks/verify-gate.ps1')) { exit 0 }
     $isAiOs = $true

@@ -26,7 +26,8 @@ claude plugin install ai-os@jay-ai-os
 
 | 想做什麼 | 怎麼做 |
 |---|---|
-| 開新專案 | 開一個空資料夾，跟 Claude 說「開案」（或輸入 `/ai-os:start-project`）|
+| 開新專案 | 開一個空資料夾，跟 Claude 說想做什麼（例如「開案」「我想做一個記帳網站」，或輸入 `/ai-os:start-project`）|
+| 修改 GitHub 上的專案 | 開一個空資料夾，貼倉庫網址說要改它；是 ai-os 專案會自動照規則做，不是的話 Claude 會問你要不要改用這套規則 |
 | 既有專案改用這套規則 | 在那個專案輸入 `/ai-os:adopt` |
 | 加新功能 | 直接描述，或輸入 `/ai-os:brainstorming` |
 | 暫停使用 | 「自訂」→「外掛程式」→ AI OS 右邊「⋮」→ 停用 |
