@@ -16,7 +16,7 @@ try {
         if ($items.Count -gt 0) { exit 0 }
         $hint = '這是空資料夾，裝有 ai-os 外掛（給新專案用的開發規則）。依使用者第一則訊息判斷：' +
                 '①要開發新的東西（網站、App、工具、腳本等），不論有沒有說「開案」→ 先用 ai-os:start-project 技能，不直接寫程式。' +
-                '②要修改既有的 GitHub 倉庫 → 把它下載到這個資料夾本身（git clone <網址> .；資料夾不是全空時改用 git init、git remote add origin <網址>、git pull origin <預設分支>），不要開案；' +
+                '②要修改既有的 GitHub 倉庫 → 先照 ai-os:env-setup 技能第〇節「檢查與安裝」做完（要重開就停），再把它下載到這個資料夾本身（git clone <網址> .；資料夾不是全空時改用 git init、git remote add origin <網址>、git pull origin <預設分支>），不要開案；' +
                 '下載後有 _管理/常駐/此次任務.md → 讀完 ${CLAUDE_PLUGIN_ROOT}/rules.md 全文並照它做，做完提醒使用者之後開新對話規則會自動載入；' +
                 '沒有 → 告訴使用者這個倉庫不歸 ai-os 管，可以直接改，或輸入 /ai-os:adopt 改由 ai-os 管理，讓他選。' +
                 '③其他（問問題、看檔案、使用者說不用開案）→ 照常回答。'

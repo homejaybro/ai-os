@@ -9,22 +9,23 @@ description: ai-os 專案遇到這些情況時讀：新電腦要裝工具（Node
 
 ai-os 外掛（自動載入規則、每回合提醒、commit 閘門）只在 Windows 有效。Mac／Linux／WSL 上不執行也不報錯，每次 commit 前要自己確認驗證跑過。外掛本身的安裝與更新見外掛 GitHub 倉庫的 `README.md`。
 
-先檢查，有版本號就代表裝好了；缺哪個再照表安裝：
-```powershell
-node --version      # 需 v18 以上
-git --version
-claude --version
-rtk --version       # 顯示的不是 Rust Token Killer ＝裝到同名的別套工具
-codegraph --version
-```
+### 檢查與安裝（開案、或下載既有倉庫後做；全都有就不提）
 
-| 工具 | 安裝 |
+1. 檢查（有版本號就是裝好了）：`node --version`（需 v18 以上）、`git --version`、`codegraph --version`、`rtk --version`（顯示的不是 Rust Token Killer ＝裝到同名的別套工具，當成沒裝）。
+2. node、git、codegraph 是必要的；rtk 是建議的。有缺 → 一次列出缺哪些、各一句白話用途，問一次「要我幫你裝嗎？會用 Windows 內建的 winget，等於同意這些軟體的授權條款；中途 Windows 跳出『是否允許變更』請按『是』」。只缺 rtk 時說明不裝也能用。使用者不同意 → 給下表的手動網址；必要的沒裝好不往下做。
+3. 同意後依序跑（每個指令前先刷新 PATH：`$env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')`）：
+
+| 工具 | 指令 |
 |---|---|
-| Node.js（v18+）| [nodejs.org](https://nodejs.org) 下載 LTS 版 |
-| Git | [git-scm.com](https://git-scm.com) |
-| Claude Code | `npm install -g @anthropic-ai/claude-code`，第一次執行 `claude` 會引導登入 |
-| RTK | 從 [github.com/rtk-ai/rtk/releases](https://github.com/rtk-ai/rtk/releases) 下載最新版 `rtk-x86_64-pc-windows-msvc.zip`，解壓到 `%USERPROFILE%\.local\bin` 並加進使用者 PATH；再跑一次 `rtk init -g`（Bash 指令的 RTK hook 靠全域設定，專案的 `.claude/settings.json` 只處理 PowerShell）|
-| CodeGraph | `npm install -g @colbymchenry/codegraph`；每個新專案 `git init` 後跑一次 `codegraph init -i` |
+| Node.js | `winget install -e --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements` |
+| Git | `winget install -e --id Git.Git --accept-package-agreements --accept-source-agreements` |
+| CodeGraph（Node 裝好後）| `npm install -g @colbymchenry/codegraph` |
+| RTK（最後裝）| `winget install -e --id rtk-ai.rtk --accept-package-agreements --accept-source-agreements`，再跑 `rtk init -g`（Bash 指令的 RTK hook 靠全域設定，專案的 `.claude/settings.json` 只處理 PowerShell）|
+
+4. 刷新 PATH 後重跑第 1 步確認。仍抓不到、或沒有 winget → 給手動網址：Node.js [nodejs.org](https://nodejs.org)（LTS 版）、Git [git-scm.com](https://git-scm.com)、RTK [github.com/rtk-ai/rtk/releases](https://github.com/rtk-ai/rtk/releases)。
+5. 有裝任何東西 → 請使用者把 Claude Code 完全關掉重開，在同一個資料夾開新對話、把剛才的需求再說一次（Claude Code 要重開才抓得到新工具；裝了 RTK 不重開，之後的指令可能全部失敗）。
+
+Claude Code 本身：`npm install -g @anthropic-ai/claude-code`，第一次執行 `claude` 會引導登入。CodeGraph 每個新專案 `git init` 後跑一次 `codegraph init -i`。
 
 依技術棧追加：Python 專案要 Python 3.10+（安裝時勾選 Add to PATH）；用 Supabase 時要 `npm install -g supabase`。
 
@@ -86,7 +87,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 |---|---|
 | RTK | 直接執行指令 |
 | CodeGraph | 改用 Grep 查依賴 |
-| Supabase MCP | 產 SQL 後請使用者手動在 Dashboard 執行 |
+| Supabase MCP | 改用 Supabase CLI 執行（如 `supabase db push`）；CLI 也不能用才請使用者在 Dashboard 貼上執行 |
 | Context7 | 遇 API 問題手動查官方文件 |
 | Playwright MCP | 改跑測試腳本（`npx playwright test`）|
 | Chrome 整合 | 改用 Playwright MCP 或手動開瀏覽器 |

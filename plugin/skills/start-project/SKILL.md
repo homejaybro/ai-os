@@ -16,7 +16,7 @@ description: 用 ai-os 開一個新專案。使用者在空資料夾（或剛建
 
 ## 1. 環境檢查、建骨架、載入共用規則
 
-1. 跑 `node --version`、`git --version`、`codegraph --version`、`rtk --version`。node（v18 以上）、git、codegraph 缺任何一個 → 停下，照 `ai-os:env-setup` 第〇節一次教一個，裝好重新檢查才往下。只有 rtk 缺 → 提醒一次「建議裝、不裝也能用」，不擋。全都有就不提。
+1. 照 `ai-os:env-setup` 第〇節「檢查與安裝」做完；要重開就停在這裡，重開後從第 0 步再判斷。
 2. 複製專案骨架（不覆蓋已存在的檔）：
    ```bash
    cp -rn "${CLAUDE_PLUGIN_ROOT}/templates/project/." .
