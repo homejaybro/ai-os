@@ -2,7 +2,6 @@
 .env*
 !.env.example
 _secrets/
-.streamlit/secrets.toml
 
 # === 依賴目錄 ===
 node_modules/
@@ -32,7 +31,7 @@ playwright/.cache/
 # === 審查暫存檔 ===
 _管理/全分支diff.txt
 
-# === commit 閘門的執行期產物 ===
+# === 存檔把關的執行期產物 ===
 _管理/.verify-marker
 
 # === CodeGraph 本地索引 ===

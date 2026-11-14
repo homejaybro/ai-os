@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 目標：專案改由外掛管理；專案專屬的規定、角色、紀錄不漏；不留兩套衝突的規則；程式碼與產出不變。先讀 `${CLAUDE_PLUGIN_ROOT}/rules.md`（轉換後要遵守的共用規則）。
 
-git 指令一律 `rtk proxy git -c core.quotepath=false ...`（RTK 會改寫 diff 輸出；中文檔名才會正常）。下文 `<主線>` ＝使用者實際在用的分支，通常是 main 或 master；工作都在別的分支時，先問要不要把它當主線。
+git 指令一律加 `-c core.quotepath=false`（中文檔名才會正常）。下文 `<主線>` ＝使用者實際在用的分支，通常是 main 或 master；工作都在別的分支時，先問要不要把它當主線。
 
 ## 1. 判斷類型與能不能轉
 
@@ -81,7 +81,7 @@ git 指令一律 `rtk proxy git -c core.quotepath=false ...`（RTK 會改寫 dif
 
 ## 8. 審查（專案自訂內容多才做）
 
-有專屬角色、改過的把關、或多條專案規定 → `rtk proxy git -c core.quotepath=false diff <備份標籤>..HEAD > _管理/全分支diff.txt`，連同盤點表交給 `ai-os:reviewer`，專找：專屬內容漏搬、規則衝突、斷掉的引用、程式碼被改動。修完回第 7 步。
+有專屬角色、改過的把關、或多條專案規定 → `git -c core.quotepath=false diff <備份標籤>..HEAD > _管理/全分支diff.txt`，連同盤點表交給 `ai-os:reviewer`，專找：專屬內容漏搬、規則衝突、斷掉的引用、程式碼被改動。修完回第 7 步。
 
 ## 9. 給使用者看
 

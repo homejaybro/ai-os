@@ -4,6 +4,7 @@
 
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $gate = Join-Path $PSScriptRoot 'verify-gate.ps1'
+$mark = Join-Path $PSScriptRoot 'mark-verify.ps1'
 $tmp  = Join-Path ([IO.Path]::GetTempPath()) ('gate-test-' + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tmp | Out-Null
 Push-Location $tmp
@@ -12,6 +13,17 @@ $fail = 0
 function Run-Gate([string]$cmd) {
     $json = @{ tool_name = 'Bash'; tool_input = @{ command = $cmd } } | ConvertTo-Json -Compress
     ($json | powershell -NoProfile -ExecutionPolicy Bypass -File $gate) -join ''
+}
+function Run-Mark([string]$cmd, [bool]$bg = $false) {
+    $json = @{ tool_name = 'Bash'; tool_input = @{ command = $cmd; run_in_background = $bg } } | ConvertTo-Json -Compress
+    $json | powershell -NoProfile -ExecutionPolicy Bypass -File $mark | Out-Null
+}
+function CheckMark([string]$name, [string]$cmd, [bool]$expectMark, [bool]$bg = $false) {
+    Remove-Item '_管理/.verify-marker' -ErrorAction SilentlyContinue
+    Run-Mark $cmd $bg
+    $marked = Test-Path '_管理/.verify-marker'
+    if ($marked -eq $expectMark) { Write-Host "PASS  $name" }
+    else { Write-Host "FAIL  $name（預期 $(if ($expectMark) {'寫標記'} else {'不寫標記'})）"; $script:fail++ }
 }
 function Check([string]$name, [string]$cmd, [bool]$expectDeny) {
     $out = Run-Gate $cmd
@@ -43,6 +55,27 @@ try {
     Check '4b 同串先 node --test 再 commit → 放行'  'node --test && git commit -m x'           $false
     Check '5 非 commit 指令 → 放行'                'git status'                               $false
     Check '7 跑 gate-test 不能替專案程式碼背書 → 擋下' 'powershell -File gate-test.ps1 && git commit -m x' $true
+    Check '11 同串裝測試套件再 commit 不算驗證 → 擋下' 'npm install -D jest && git commit -m x' $true
+    Check '12 同串 --if-present 再 commit 不算驗證 → 擋下' 'npm test --if-present && git commit -m x' $true
+    Check '13 git commit -am 也要驗證 → 擋下'        'git commit -am x'                         $true
+
+    # 標記：真的跑驗證才寫
+    CheckMark 'M1 npm test → 寫標記'                 'npm test'                                 $true
+    CheckMark 'M2 cd 後 npx playwright test → 寫標記' 'cd web && npx playwright test'           $true
+    CheckMark 'M3 裝測試套件 → 不寫'                 'npm install -D vitest'                    $false
+    CheckMark 'M4 看版本 → 不寫'                     'pytest --version'                         $false
+    CheckMark 'M5 提到工具名的其他指令 → 不寫'       'cat jest.config.js'                       $false
+    CheckMark 'M6 驗證接管線 → 不寫'                 'npm test | tail -5'                       $false
+    CheckMark 'M7 背景執行 → 不寫'                   'npm test'                                 $false $true
+    CheckMark 'M8 commit 訊息提到 pytest → 不寫'     'git commit -m "pytest passed"'            $false
+
+    # 主線：驗證過、標記比程式碼新 → 放行
+    Start-Sleep -Milliseconds 1100
+    Run-Mark 'npm run build'
+    Check '14 驗證過後 commit → 放行'                'git commit -m x'                          $false
+    Start-Sleep -Milliseconds 1100
+    'y' | Set-Content a.js; git add a.js
+    Check '15 驗證後又改程式碼 → 擋下'               'git commit -m x'                          $true
 
     git rm -q --cached a.js
     Check '9 同串 git add 未驗證程式碼再 commit → 擋下' 'git add a.js; git commit -m x'           $true
@@ -50,6 +83,11 @@ try {
     'doc' | Set-Content n.md
     git add n.md
     Check '6 只有文件的 commit → 放行'              'git commit -m docs'                       $false
+    New-Item -ItemType Directory -Force -Path '_產出/草圖' | Out-Null
+    '<html></html>' | Set-Content '_產出/草圖/a.html'
+    git add '_產出/草圖/a.html'
+    Check '16 只有 _產出 的成品 → 放行'             'git commit -m sketch'                     $false
+    git rm -q --cached '_產出/草圖/a.html'
 
     # 舊範本複製開的專案自帶閘門 → 外掛不插手（交給專案自己的閘門）
     git add a.js

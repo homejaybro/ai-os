@@ -13,7 +13,8 @@ try {
     $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
     # 使用者說過「不要交給 ai-os」的資料夾記在這裡，之後不再問
     $declinedFile = Join-Path $env:USERPROFILE '.claude\ai-os\不接管的資料夾.txt'
-    $declineCmd = "New-Item -ItemType Directory -Force (Split-Path '$declinedFile') | Out-Null; Add-Content -LiteralPath '$declinedFile' -Value '$proj' -Encoding utf8"
+    $q = { param($s) $s -replace "'", "''" }   # 路徑含單引號（如 O'Brien）時，指令照樣能跑
+    $declineCmd = "New-Item -ItemType Directory -Force (Split-Path '$(& $q $declinedFile)') | Out-Null; Add-Content -LiteralPath '$(& $q $declinedFile)' -Value '$(& $q $proj)' -Encoding utf8"
     $offer = '先問一次「要把這個專案交給 ai-os 管嗎？（之後會照 ai-os 規則做：先問清楚再做、碰到紅線先問、做完附測試結果）」。' +
              "好 → 先照 ai-os:env-setup 技能第〇節「檢查與安裝」做完（要重開就停），再讀 $root\skills\adopt\SKILL.md 全文照做（等同使用者輸入 /ai-os:adopt；檔內的 `${CLAUDE_PLUGIN_ROOT} 一律換成 $root）；" +
              "不要 → 跑 $declineCmd 記下來，之後不再問，然後照常做他要的事。"

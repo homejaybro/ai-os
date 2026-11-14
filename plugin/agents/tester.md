@@ -1,7 +1,7 @@
 ---
 name: tester
 description: 撰寫與執行測試、用 Playwright 驗收畫面。主 Agent 預設自己測；只有要一次驗收很多畫面、操作會塞滿主對話時才派它。測試框架依專案 STACK_RULES。
-tools: Read, Write, Edit, Bash, Grep, Glob, mcp__playwright__browser_navigate, mcp__playwright__browser_click, mcp__playwright__browser_fill_form, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_wait_for, mcp__playwright__browser_type, mcp__playwright__browser_select_option, mcp__playwright__browser_console_messages, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_type, mcp__plugin_playwright_playwright__browser_select_option, mcp__plugin_playwright_playwright__browser_console_messages
+tools: Read, Write, Edit, Bash, Grep, Glob, mcp__playwright__browser_navigate, mcp__playwright__browser_click, mcp__playwright__browser_fill_form, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_wait_for, mcp__playwright__browser_type, mcp__playwright__browser_select_option, mcp__playwright__browser_console_messages, mcp__playwright__browser_file_upload, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_resize, mcp__playwright__browser_press_key, mcp__playwright__browser_hover, mcp__playwright__browser_navigate_back, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_type, mcp__plugin_playwright_playwright__browser_select_option, mcp__plugin_playwright_playwright__browser_console_messages, mcp__plugin_playwright_playwright__browser_file_upload, mcp__plugin_playwright_playwright__browser_handle_dialog, mcp__plugin_playwright_playwright__browser_resize, mcp__plugin_playwright_playwright__browser_press_key, mcp__plugin_playwright_playwright__browser_hover, mcp__plugin_playwright_playwright__browser_navigate_back
 color: cyan
 omitClaudeMd: true
 ---
@@ -25,10 +25,11 @@ Playwright MCP 拿不到時，先確認工具名稱前綴（`mcp__playwright__*`
 - 主 Agent 告知「已上線或已有真資料」，或 STACK_RULES「環境與金鑰」記有測試庫 → 只連測試庫，絕不連正式資料；連不到測試庫就回報
 - 沒有上述情況（上線前只有一個資料庫）→ 可直接連，寫入的資料加標記、測完只清自己加的，不跑會清空整張表的測試
 - 目標網址不是本機（非 `localhost`）→ 先停下確認是不是正式網站。正式網站只做唯讀檢查（瀏覽、截圖），不跑會寫入或刪除資料的情境
+- 會產生真實效果的第三方服務（金流、寄信、簡訊、推播、外部 AI）只用測試金鑰；不確定 `.env` 裡是哪個環境的金鑰 → 先回報，不跑
 - 不改非測試的程式碼；發現 bug 就回報。需要測試用的種子資料而還沒有 → 回報
 
 ## 收工
-1. 全部通過才 `git add` 測試檔與截圖，不 commit。有失敗就不 add，在回報說明（例外：主 Agent 明講「先寫會失敗的測試」時，照常 add 並註明「預期失敗」）
+1. 實測通過的驗收條件在規格裡打勾。全部通過才 `git add` 測試檔、截圖與規格，不 commit。有失敗就不 add，在回報說明（例外：主 Agent 明講「先寫會失敗的測試」時，照常 add 並註明「預期失敗」）
 2. 回報：
    - 跑了什麼指令（寫清楚是全部還是單檔）、結果（N passed / N failed）
    - 驗收截圖的路徑

@@ -52,22 +52,28 @@ try {
     #      同段（中間無 ;/&/|），不管前面加了什麼指令
     if ($cmd -notmatch '\bgit\b[^;&|]*\bcommit\b') { exit 0 }
 
+    # H2（2026-11-14）：每段（&& 分隔）要「以驗證工具開頭」才算；裝套件、看版本、--if-present 不算
+    function Test-Verify([string]$s) {
+        $s = $s.Trim()
+        if ($s -match '(^|\s)(install|add|uninstall|i|ci)(\s|$)|--version|--help|--if-present') { return $false }
+        $s = $s -replace '^(npx\s+|python3?\s+-m\s+|py\s+-m\s+|uv\s+run\s+)', ''
+        return $s -match ('^((npm|yarn|pnpm)\s+(run\s+)?(build|test|lint|typecheck|check)\b|tsc\b|playwright\s+test\b' +
+                          '|vitest\b|jest\b|mocha\b|node\s+--test\b|pytest\b|py_compile\b|mypy\b|ruff\b|flake8\b' +
+                          '|cargo\s+(build|test|check|clippy)\b|go\s+(build|test|vet)\b|dotnet\s+(build|test)\b' +
+                          '|mvn\s+(compile|test)\b|gradle\s+(build|test)\b)')
+    }
+
     # B-3：同一指令串內已含驗證指令（如 npm run build && git commit）→ 放行
-    #   B-9：先去掉引號內文字、驗證字樣加字詞邊界——commit message 寫「新增 playwright test」「majestic」不能算驗證
-    $cmdNoQuotes = [regex]::Replace($cmd, '"[^"]*"|''[^'']*''', '')
-    $verifyPattern = '(npm|yarn|pnpm)\s+(run\s+)?(build|test|lint|typecheck|check)' +
-                     '|(^|\s|&&\s*)tsc(\s|$)|playwright\s+test|\bvitest\b|\bjest\b|\bmocha\b|\bnode\s+--test\b' +
-                     '|\bpytest\b|\bpy_compile\b|\bmypy\b|\bruff\b|\bflake8\b' +
-                     '|cargo\s+(build|test|check|clippy)|go\s+(build|test|vet)' +
-                     '|dotnet\s+(build|test)|mvn\s+(compile|test)|gradle\s+(build|test)'
+    #   B-9：先去掉引號內文字——commit message 寫「新增 playwright test」不能算驗證
     #   只認「驗證指令 && … git commit」：用 ; 或 | 串起來時，驗證失敗也會照樣 commit，不算
+    $cmdNoQuotes = [regex]::Replace($cmd, '"[^"]*"|''[^'']*''', '')
     $segs = $cmdNoQuotes -split '&&'
     $ci = -1
     for ($i = 0; $i -lt $segs.Count; $i++) { if ($segs[$i] -match '\bgit\b[^;&|]*\bcommit\b') { $ci = $i; break } }
     if ($ci -gt 0 -and ($segs[$ci] -split '\bgit\b', 2)[0] -notmatch '[;|\r\n]') {
         for ($j = $ci - 1; $j -ge 0; $j--) {
             if ($segs[$j] -match '[;|\r\n]') { break }
-            if ($segs[$j] -match $verifyPattern) { exit 0 }
+            if (Test-Verify $segs[$j]) { exit 0 }
         }
     }
 
@@ -77,7 +83,12 @@ try {
     Set-Location -LiteralPath $root
 
     # E-1（2026-10-18，改成外掛後）：外掛對所有專案生效，只管用 ai-os 開案的專案
-    if (-not (Test-Path -LiteralPath '_管理/常駐/此次任務.md')) { exit 0 }
+    # E-4（2026-11-14）：ai-os 專案是大倉庫的子資料夾時，改到開對話的資料夾；下面的 git 指令加 --relative 只看這個資料夾
+    if (-not (Test-Path -LiteralPath '_管理/常駐/此次任務.md')) {
+        $pd = $env:CLAUDE_PROJECT_DIR
+        if (-not ($pd -and (Test-Path -LiteralPath (Join-Path $pd '_管理/常駐/此次任務.md')))) { exit 0 }
+        Set-Location -LiteralPath $pd
+    }
     # E-2（2026-10-19）：用舊範本複製開的專案自帶閘門與舊規則書，外掛不插手（避免兩套規則、閘門跑兩次）。
     #      舊專案照遷移步驟刪掉 _開發檔案/scripts/hooks/ 後，外掛自動接手。
     if (Test-Path -LiteralPath '_開發檔案/scripts/hooks/verify-gate.ps1') { exit 0 }
@@ -92,7 +103,7 @@ try {
 
     # 取要被 commit 的檔案清單
     #   core.quotepath=false：否則含中文的路徑會被轉成八進位轉義
-    $staged = @(git -c core.quotepath=false diff --cached --name-only 2>$null)
+    $staged = @(git -c core.quotepath=false diff --cached --name-only --relative 2>$null)
     if ($LASTEXITCODE -ne 0) { exit 0 }
 
     # B-1：git commit -a / -am 會在 commit 當下暫存已追蹤檔的修改
@@ -102,10 +113,9 @@ try {
     #      a.js 還沒暫存 → $staged 為空 → 靜默放行。commit 前的指令串含 git add 時，
     #      連工作區變更與未追蹤檔一起算（寧可多擋，正解是重跑驗證）。
     #      先去掉引號內文字，commit message 提到「git add」不算。
-    $cmdNoQuotes = [regex]::Replace($cmd, '"[^"]*"|''[^'']*''', '')
     $chainsAdd = $cmdNoQuotes -match '\bgit\b[^;&|]*\badd\b'
     if ($usesAllFlag -or $chainsAdd) {
-        $staged += @(git -c core.quotepath=false diff --name-only 2>$null)
+        $staged += @(git -c core.quotepath=false diff --name-only --relative 2>$null)
         if ($chainsAdd) { $staged += @(git -c core.quotepath=false ls-files --others --exclude-standard 2>$null) }
         $staged = @($staged | Where-Object { $_ } | Select-Object -Unique)
     }
@@ -117,7 +127,7 @@ try {
     $scriptExt = '\.(ps1|sh|bat|cmd|py|js|mjs|cjs|ts|tsx|jsx)$'
     $exempt    = '\.(md|txt|png|jpe?g|gif|svg|ico|webp|woff2?|ttf|eot|mp4|pdf)$' +
                  '|^\.gitignore$|^\.mcp\.json$|(^|/)\.gitkeep$' +
-                 '|^\.claude/|^_管理/|^\.github/'
+                 '|^\.claude/|^_管理/|^_產出/|^\.github/'
 
     $code = @($staged | Where-Object { ($_ -notmatch $exempt) -or ($_ -match $scriptExt) })
     if ($code.Count -eq 0) { exit 0 }
@@ -125,7 +135,7 @@ try {
     # index 的 mtime ＝ 最後一次 staging 的時間（B-6／B-7 用）
     $indexPath = & $gp 'index'
     $indexTime = if ($indexPath -and (Test-Path -LiteralPath $indexPath)) { (Get-Item -LiteralPath $indexPath).LastWriteTimeUtc } else { [DateTime]::MinValue }
-    $dirty = @(git -c core.quotepath=false diff --name-only 2>$null)
+    $dirty = @(git -c core.quotepath=false diff --name-only --relative 2>$null)
 
     $newest   = [DateTime]::MinValue
     $anyKnown = $false
@@ -150,7 +160,7 @@ try {
 
         $reason = "存檔把關：本次要 commit 的內容含程式碼變更（$files），" +
                   "但自該內容產生後未執行任何驗證指令。`n" +
-                  "請先實跑建置／型別檢查／測試（指令依 STACK_RULES，如 npm run build、npx tsc --noEmit、npx playwright test），" +
+                  "請先實跑建置／型別檢查／測試（指令依 STACK_RULES，如 npm run build、npx tsc --noEmit、npx playwright test；裝套件、看版本、--if-present、背景執行都不算），" +
                   "確認輸出無誤後再 commit——並把實跑指令與輸出摘要寫進 `此次任務.md` 的「上次完成時填寫」欄。`n" +
                   "正解是重跑驗證（單獨跑，或用 && 接在 commit 前；不要接 | 或 ;），不是改用 git commit -am。"
 

@@ -6,13 +6,7 @@
 #
 # 失敗行為：任何錯誤都靜默 exit 0（PostToolUse 本身無法阻擋，且不應干擾流程）。
 #
-# ── v3.14 補洞（2026-07-30，須與 verify-gate.ps1 同步維護）──────
-# 這支腳本與 verify-gate.ps1 判斷「是否為 git 指令」的邏輯必須保持一致：
-# 任何在 git 前面加前綴的 wrapper（如 `rtk proxy git commit`）都會讓 git
-# 不在指令開頭或分隔符之後 → 若沿用舊的位置錨點 regex，這條排除判斷會
-# 失效，導致 commit message 裡的驗證類字樣（如「pytest passed」）被
-# 誤判成真的跑過驗證 → 偽造出通行證（B-4 的原始漏洞以新繞過手法重演）。
-# → 拿掉位置錨點，只要求 git 這個詞出現在指令任何位置。
+# Test-Verify 必須與 verify-gate.ps1 的同名函式一字不差（新增技術棧兩邊一起加）。
 
 try {
     # D-2（2026-10-18）：必須與 verify-gate.ps1 一樣用 UTF-8 讀 stdin。沒設的話，指令或路徑含中文時
@@ -27,36 +21,38 @@ try {
     $cmd = $data.tool_input.command
     if (-not $cmd) { exit 0 }
 
-    # B-4（v3.13）＋ C-1（v3.14）：commit message 提到 pytest／build／test 會偽造出通行證
-    #   例：git commit -m "chore: add pytest config" → 標記被寫下 → 下一次 commit 直接放行
-    #   例：rtk proxy git commit -m "pytest passed" → 若用位置錨點 regex 會漏抓（見上方補洞說明）
-    #   git 指令一律不視為驗證動作，不管前面加了什麼包裝指令
-    if ($cmd -match '\bgit\b') { exit 0 }
+    # 背景執行：工具一啟動就回報成功，測試其實還沒跑完 → 不算
+    if ($data.tool_input.run_in_background) { exit 0 }
 
-    # 去掉引號內文字再比對（echo "run jest" 這類不能算驗證）
+    # 去掉引號內文字再比對（git commit -m "pytest passed"、echo "run jest" 不能算驗證）
     $cmdNoQuotes = [regex]::Replace($cmd, '"[^"]*"|''[^'']*''', '')
 
-    # 驗證類指令（跨技術棧；新增技術棧時在此追加）
-    $verifyPattern = '(npm|yarn|pnpm)\s+(run\s+)?(build|test|lint|typecheck|check)' +
-                     '|(^|\s|&&\s*)tsc(\s|$)' +
-                     '|playwright\s+test|\bvitest\b|\bjest\b|\bmocha\b|\bnode\s+--test\b' +
-                     '|\bpytest\b|\bpy_compile\b|\bmypy\b|\bruff\b|\bflake8\b' +
-                     '|cargo\s+(build|test|check|clippy)' +
-                     '|go\s+(build|test|vet)' +
-                     '|dotnet\s+(build|test)' +
-                     '|mvn\s+(compile|test)|gradle\s+(build|test)'
+    # H2（2026-11-14）：每段（&& 分隔）要「以驗證工具開頭」才算；裝套件、看版本、--if-present 不算
+    function Test-Verify([string]$s) {
+        $s = $s.Trim()
+        if ($s -match '(^|\s)(install|add|uninstall|i|ci)(\s|$)|--version|--help|--if-present') { return $false }
+        $s = $s -replace '^(npx\s+|python3?\s+-m\s+|py\s+-m\s+|uv\s+run\s+)', ''
+        return $s -match ('^((npm|yarn|pnpm)\s+(run\s+)?(build|test|lint|typecheck|check)\b|tsc\b|playwright\s+test\b' +
+                          '|vitest\b|jest\b|mocha\b|node\s+--test\b|pytest\b|py_compile\b|mypy\b|ruff\b|flake8\b' +
+                          '|cargo\s+(build|test|check|clippy)\b|go\s+(build|test|vet)\b|dotnet\s+(build|test)\b' +
+                          '|mvn\s+(compile|test)\b|gradle\s+(build|test)\b)')
+    }
 
     # 用 ; | 串接或多行時，整串成功不代表驗證成功（npm test | tail 失敗也算成功）→ 不寫標記
     if ($cmdNoQuotes -match '[;|\r\n]') { exit 0 }
 
-    if ($cmdNoQuotes -match $verifyPattern) {
+    if (@($cmdNoQuotes -split '&&' | Where-Object { Test-Verify $_ }).Count -gt 0) {
         # B-2（v3.13）：切到 repo 根，否則 cwd 在子目錄時標記會寫錯位置
         $root = (git rev-parse --show-toplevel 2>$null)
         if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root }
 
         # E-1（改成外掛後）：只在 ai-os 專案寫標記，不在別的專案留下檔案
         $dir = '_管理'
-        if (-not (Test-Path -LiteralPath '_管理/常駐/此次任務.md')) { exit 0 }
+        if (-not (Test-Path -LiteralPath '_管理/常駐/此次任務.md')) {
+            $pd = $env:CLAUDE_PROJECT_DIR   # E-4：ai-os 專案是大倉庫的子資料夾
+            if (-not ($pd -and (Test-Path -LiteralPath (Join-Path $pd '_管理/常駐/此次任務.md')))) { exit 0 }
+            Set-Location -LiteralPath $pd
+        }
         if (Test-Path -LiteralPath '_開發檔案/scripts/hooks/verify-gate.ps1') { exit 0 }   # E-2：舊範本專案自帶閘門，不插手
         Set-Content -Path (Join-Path $dir '.verify-marker') `
                     -Value (Get-Date -Format 'o') -Encoding utf8

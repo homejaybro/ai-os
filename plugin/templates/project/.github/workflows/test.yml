@@ -1,5 +1,6 @@
 name: E2E Tests
 
+# 主線不是 main（例如 master）時改下面兩處
 on:
   push:
     branches: [main]
@@ -23,7 +24,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # 指令依 STACK_RULES 調整
+      # 指令依 STACK_RULES 調整；npm test 已含 Playwright 時，刪掉最後的 Run Playwright tests
       - name: Typecheck
         run: npm run typecheck --if-present
 
