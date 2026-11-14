@@ -1,6 +1,6 @@
 ---
 name: env-setup
-description: ai-os 專案遇到這些情況時讀：新電腦要裝工具（Node、Git、RTK、CodeGraph、ai-os 外掛）、開案初始化的版控規範、依技術棧追加 MCP、工具失效要降級、commit 閘門（存檔把關 hook）行為異常。
+description: ai-os 專案遇到這些情況時讀：新電腦要裝工具（Node、Git、RTK、CodeGraph、ai-os 外掛）、新階段開工前檢查套件與工具更新、開案初始化的版控規範、依技術棧追加 MCP、工具失效要降級、commit 閘門（存檔把關 hook）行為異常。
 ---
 
 # 環境與版控
@@ -123,3 +123,14 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 ## 五、自動放行的指令
 
 專案 `.claude/settings.json` 的 `permissions.allow` 預先放行常用的安全指令（git 的查看／add／commit／push／tag、npm run／test、tsc、playwright test、codegraph）。刻意不放行：`git checkout`、`git branch`、`git stash`、`rm`、`--force`。要增減清單直接改該檔；要讓之後的新專案也套用，改外掛 `templates/project/.claude/settings.json`。
+
+## 六、套件與工具更新（新階段開工前）
+
+時機：新階段的決策總表核准後、動工前，每階段一次；開案後的第一階段不做（剛裝好）。工作區有未存檔的修改時先收尾再做。
+
+1. 套件：依 STACK_RULES 的套件管理工具檢查。npm → `npm outdated`、`npm audit`；pip → `pip list --outdated`（有 `pip-audit` 就一起跑）；其他工具用對應指令。
+   - 安全修補與不跨大版本的更新：自己做（npm → `npm audit fix`、`npm update`，不加 `--force`）→ 跑全部測試 → 通過就 commit「更新套件（安全修補與小版本）」；失敗就還原套件清單與鎖定檔（`git checkout -- package.json package-lock.json` 後 `npm install`），報告時一句話帶過。
+   - 跨大版本（可能要改程式）或修補漏洞必須跨大版本的：列給使用者，每項一句好處、一句風險，問一次。同意後一次升一個，每個都跑全部測試，失敗就還原那一個並說明。
+2. 工具：`winget upgrade` 裡有 Node.js、Git、RTK，或 `npm outdated -g @colbymchenry/codegraph` 有新版 → 列出來問一次。同意後跑 `winget upgrade -e --id <ID> --accept-package-agreements --accept-source-agreements`、`npm install -g @colbymchenry/codegraph@latest`，再照第〇節第 4、5 步確認並請使用者重開。Node.js 跨大版本時，同意後先跑全部測試確認專案還能用。
+3. 都沒有可更新的 → 不提。
+
