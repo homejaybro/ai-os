@@ -69,6 +69,14 @@
       "PowerShell(python -m pytest:*)",
       "PowerShell(gh run list:*)",
       "PowerShell(gh run view:*)"
+    ],
+    "ask": [
+      "Bash(git push*--force*)",
+      "Bash(git push* -f*)",
+      "Bash(rtk proxy:*)",
+      "PowerShell(git push*--force*)",
+      "PowerShell(git push* -f*)",
+      "PowerShell(rtk proxy:*)"
     ]
   }
 }

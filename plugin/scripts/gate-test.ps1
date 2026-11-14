@@ -38,6 +38,8 @@ try {
     Check '4 同指令串先 build 再 commit → 放行'     'npm run build && git commit -m x'         $false
     Check '5b commit 訊息寫 playwright test 不算驗證 → 擋下' 'git commit -m "新增 playwright test 設定"' $true
     Check '5c commit 訊息含 majestic 不算驗證 → 擋下' 'git commit -m "majestic update"' $true
+    Check '4c 用 ; 串接 build 與 commit（build 失敗也會 commit）→ 擋下' 'npm run build; git commit -m x' $true
+    Check '4d 驗證接管線再 && commit → 擋下' 'npm test | tail -5 && git commit -m x' $true
     Check '4b 同串先 node --test 再 commit → 放行'  'node --test && git commit -m x'           $false
     Check '5 非 commit 指令 → 放行'                'git status'                               $false
     Check '7 跑 gate-test 不能替專案程式碼背書 → 擋下' 'powershell -File gate-test.ps1 && git commit -m x' $true

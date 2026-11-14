@@ -46,9 +46,6 @@ try {
     $cmd = ($raw | ConvertFrom-Json).tool_input.command
     if (-not $cmd) { exit 0 }
 
-    # 指令第一行（heredoc／commit message 內文不算）
-    $firstLine = ($cmd -split "`r?`n", 2)[0]
-
     # 只管 git commit（放寬：涵蓋 git -C <path> commit、git -c k=v commit、
     # 指令串中的 commit，以及前面被任何 wrapper 包裝的 git，如 `rtk proxy git commit`）
     # C-1：故意不要求 git 在開頭或分隔符之後——只要求 git 與 commit
@@ -63,7 +60,16 @@ try {
                      '|\bpytest\b|\bpy_compile\b|\bmypy\b|\bruff\b|\bflake8\b' +
                      '|cargo\s+(build|test|check|clippy)|go\s+(build|test|vet)' +
                      '|dotnet\s+(build|test)|mvn\s+(compile|test)|gradle\s+(build|test)'
-    if ($cmdNoQuotes -match $verifyPattern) { exit 0 }
+    #   只認「驗證指令 && … git commit」：用 ; 或 | 串起來時，驗證失敗也會照樣 commit，不算
+    $segs = $cmdNoQuotes -split '&&'
+    $ci = -1
+    for ($i = 0; $i -lt $segs.Count; $i++) { if ($segs[$i] -match '\bgit\b[^;&|]*\bcommit\b') { $ci = $i; break } }
+    if ($ci -gt 0 -and ($segs[$ci] -split '\bgit\b', 2)[0] -notmatch '[;|\r\n]') {
+        for ($j = $ci - 1; $j -ge 0; $j--) {
+            if ($segs[$j] -match '[;|\r\n]') { break }
+            if ($segs[$j] -match $verifyPattern) { exit 0 }
+        }
+    }
 
     # B-2：切到 repo 根，否則相對路徑全部解析失敗 → 靜默失效
     $root = (git rev-parse --show-toplevel 2>$null)
@@ -146,7 +152,7 @@ try {
                   "但自該內容產生後未執行任何驗證指令。`n" +
                   "請先實跑建置／型別檢查／測試（指令依 STACK_RULES，如 npm run build、npx tsc --noEmit、npx playwright test），" +
                   "確認輸出無誤後再 commit——並把實跑指令與輸出摘要寫進 `此次任務.md` 的「上次完成時填寫」欄。`n" +
-                  "正解是重跑驗證，不是改用 git commit -am。"
+                  "正解是重跑驗證（單獨跑，或用 && 接在 commit 前；不要接 | 或 ;），不是改用 git commit -am。"
 
         @{
             hookSpecificOutput = @{

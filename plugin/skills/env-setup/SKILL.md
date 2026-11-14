@@ -122,7 +122,7 @@ _管理/  _產出/  _開發檔案/  .github/  playwright.config.ts  程式碼目
 
 ## 五、自動放行的指令
 
-專案 `.claude/settings.json` 的 `permissions.allow` 預先放行常用的安全指令（git 的查看／add／commit／push／tag、npm run／test、tsc、playwright test、codegraph）。刻意不放行：`git checkout`、`git branch`、`git stash`、`rm`、`--force`。要增減清單直接改該檔；要讓之後的新專案也套用，改外掛 `templates/project/.claude/settings.json`。
+專案 `.claude/settings.json` 的 `permissions.allow` 預先放行常用的安全指令（git 的查看／add／commit／push／tag、npm run／test、tsc、playwright test、codegraph）。刻意不放行：`git checkout`、`git branch`、`git stash`、`rm`；`git push --force`／`-f` 與 `rtk proxy` 放在 `permissions.ask`，每次都問。要增減清單直接改該檔；要讓之後的新專案也套用，改外掛 `templates/project/.claude/settings.json`。
 
 ## 六、套件與工具更新（新階段開工前）
 

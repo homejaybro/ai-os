@@ -18,6 +18,7 @@ try {
     # D-2（2026-10-18）：必須與 verify-gate.ps1 一樣用 UTF-8 讀 stdin。沒設的話，指令或路徑含中文時
     #      會被以 console codepage 讀成亂碼、吃掉引號 → JSON 解析失敗 → 標記沒寫（錯誤 log 實測抓到）
     try { [Console]::InputEncoding = New-Object System.Text.UTF8Encoding($false) } catch { }
+    try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false) } catch { }   # 否則 git rev-parse 回傳的中文路徑變亂碼
     $raw = [Console]::In.ReadToEnd()
     if ($raw) { $raw = $raw.TrimStart([char]0xFEFF) }   # 去掉 BOM（同 verify-gate.ps1 的 D-1）
     if (-not $raw) { exit 0 }
@@ -44,6 +45,9 @@ try {
                      '|go\s+(build|test|vet)' +
                      '|dotnet\s+(build|test)' +
                      '|mvn\s+(compile|test)|gradle\s+(build|test)'
+
+    # 用 ; | 串接或多行時，整串成功不代表驗證成功（npm test | tail 失敗也算成功）→ 不寫標記
+    if ($cmdNoQuotes -match '[;|\r\n]') { exit 0 }
 
     if ($cmdNoQuotes -match $verifyPattern) {
         # B-2（v3.13）：切到 repo 根，否則 cwd 在子目錄時標記會寫錯位置

@@ -46,7 +46,7 @@ git stash
 ### 退回到某一版（使用者說「回到某某那版」）
 
 1. 先打備份標籤：`git tag backup-YYYYMMDD-HHMM`
-2. 把工作區還原成目標版的內容：`git rm -r -q .`（只清已追蹤的檔）→ `git checkout <目標版的標籤或 hash> -- .`；再把管理文件與規則還原成現況：`git checkout backup-YYYYMMDD-HHMM -- _管理 CLAUDE.md .claude _開發檔案/scripts`（否則決策、踩坑、核准欄會一起退掉）。在 `此次任務.md` 記一句「已退回到 {版本}」，並在 `方案紀錄.md` 脈絡區追加原因
+2. 把工作區還原成目標版的內容：`git rm -r -q .`（只清已追蹤的檔）→ `git checkout <目標版的標籤或 hash> -- .`；再把管理文件與規則還原成現況：`git checkout backup-YYYYMMDD-HHMM -- _管理 CLAUDE.md .claude`（否則決策、踩坑、核准欄會一起退掉）。在 `此次任務.md` 記一句「已退回到 {版本}」，並在 `方案紀錄.md` 脈絡區追加原因
 3. 含程式碼就先跑 STACK_RULES 的驗證指令，再 commit 成一筆「還原到 {版本白話名}」，然後 `git push`
 4. 退錯了：用同樣步驟退回 `backup-…` 標籤
 

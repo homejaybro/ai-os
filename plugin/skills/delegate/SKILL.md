@@ -13,7 +13,7 @@ description: ai-os 專案決定要派子 Agent（ai-os:builder／tester／review
 |---|---|
 | 需要大量讀檔才能回答的探索（找某個功能散在哪、理解陌生的程式碼）| 內建 `Explore` |
 | 真正能同時進行、互不相干的工作（兩者不改同一批檔）| `ai-os:builder`，或內建 general-purpose |
-| 碰紅線的改動做完後的獨立審查 | `ai-os:reviewer`（或 `/code-review`）|
+| 碰紅線的改動做完後、大型任務整個分支完成後的獨立審查 | `ai-os:reviewer`（或 `/code-review`）|
 | 階段功能 3 個以上或涉及紅線的設計文件審查 | `ai-os:reviewer`（模式二）|
 | 一次要驗收很多畫面、會塞滿主對話的 Playwright 操作 | `ai-os:tester` |
 
