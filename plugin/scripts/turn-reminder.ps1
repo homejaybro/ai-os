@@ -12,8 +12,8 @@ try {
     if (-not (Test-Path -LiteralPath (Join-Path $proj '_管理/常駐/此次任務.md'))) { exit 0 }
     if (Test-Path -LiteralPath (Join-Path $proj '_開發檔案/scripts/hooks/verify-gate.ps1')) { exit 0 }
 
-    $ctx = 'AI OS 收尾規則：這一回合結束時的最後一則文字，一件事做完就用「## 做完了」完成回報並給一個「下一步建議」；' +
-           '還在做或在等使用者時，最後一行寫「你要做的事」。'
+    $ctx = 'AI OS 收尾規則：做完一件工作時，這一回合最後一則文字用「## 做完了」完成回報並給一個「下一步建議」；' +
+           '還在做或在等使用者時，最後一行寫「你要做的事」；只是回答問題就直接回答。'
     @{
         hookSpecificOutput = @{
             hookEventName     = 'UserPromptSubmit'
