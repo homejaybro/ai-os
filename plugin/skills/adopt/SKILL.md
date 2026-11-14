@@ -1,6 +1,6 @@
 ---
 name: adopt
-description: 把既有專案（舊 AI OS 範本專案、有自己規則書的專案、或沒有架構只有程式碼的專案）改由 ai-os 外掛管理。只在使用者於該專案輸入 /ai-os:adopt 時執行。
+description: 把既有專案（舊 AI OS 範本專案、有自己規則書的專案、或沒有架構只有程式碼的專案）改由 ai-os 外掛管理。只在使用者於該專案輸入 /ai-os:adopt，或在對話中同意「交給 ai-os 管」時執行。
 disable-model-invocation: true
 ---
 

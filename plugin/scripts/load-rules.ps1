@@ -10,27 +10,51 @@ try {
     [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
     $proj = $env:CLAUDE_PROJECT_DIR
     if (-not $proj) { $proj = (Get-Location).Path }
+    $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+    # 使用者說過「不要交給 ai-os」的資料夾記在這裡，之後不再問
+    $declinedFile = Join-Path $env:USERPROFILE '.claude\ai-os\不接管的資料夾.txt'
+    $declineCmd = "New-Item -ItemType Directory -Force (Split-Path '$declinedFile') | Out-Null; Add-Content -LiteralPath '$declinedFile' -Value '<資料夾完整路徑>' -Encoding utf8"
+    $offer = '先問一次「要把這個專案交給 ai-os 管嗎？（之後會照 ai-os 規則做：先問清楚再做、碰到紅線先問、做完附測試結果）」。' +
+             "好 → 先照 ai-os:env-setup 技能第〇節「檢查與安裝」做完（要重開就停），再讀 $root\skills\adopt\SKILL.md 全文照做（等同使用者輸入 /ai-os:adopt）；" +
+             "不要 → 跑 $declineCmd 記下來，之後不再問，然後照常做他要的事。"
+    function Send-Hint([string]$text) {
+        @{ hookSpecificOutput = @{ hookEventName = 'SessionStart'; additionalContext = $text } } | ConvertTo-Json -Depth 5 -Compress
+    }
+    function Test-Declined([string]$dir) {
+        if (-not (Test-Path -LiteralPath $declinedFile)) { return $false }
+        $d = $dir.TrimEnd('\', '/')
+        foreach ($line in (Get-Content -LiteralPath $declinedFile -Encoding UTF8)) { if ($line.Trim().TrimEnd('\', '/') -ieq $d) { return $true } }
+        return $false
+    }
+    $existingHint = '這個資料夾是既有專案，還沒交給 ai-os 外掛管。使用者第一則訊息是要在這裡開發或修改程式時，動手前' + $offer + '只是問問題、看檔案 → 照常回答，不問。'
+
     if (-not (Test-Path -LiteralPath (Join-Path $proj '_管理/常駐/此次任務.md'))) {
-        # 空資料夾（只有 .git、.claude 也算）：提醒 Claude 新開發走開案、改既有倉庫先接上規則，不用等使用者講出「開案」
         $items = @(Get-ChildItem -LiteralPath $proj -Force -ErrorAction Stop | Where-Object { $_.Name -notin @('.git', '.claude', 'desktop.ini', 'Thumbs.db') })
-        if ($items.Count -gt 0) { exit 0 }
+        if ($items.Count -gt 0) {
+            # 既有專案（有版本紀錄或專案設定檔）：問要不要交給 ai-os；外掛本身的倉庫、說過不要的資料夾不問
+            if (Test-Path -LiteralPath (Join-Path $proj '.claude-plugin')) { exit 0 }
+            if (Test-Declined $proj) { exit 0 }
+            $signs = @('.git', 'package.json', 'pyproject.toml', 'requirements.txt', 'go.mod', 'Cargo.toml', 'composer.json', 'index.html', 'CLAUDE.md', 'AGENTS.md')
+            $isProject = @($signs | Where-Object { Test-Path -LiteralPath (Join-Path $proj $_) }).Count -gt 0
+            if (-not $isProject) { $isProject = @(Get-ChildItem -LiteralPath $proj -Filter '*.sln' -ErrorAction SilentlyContinue).Count -gt 0 }
+            if ($isProject) { Send-Hint $existingHint }
+            exit 0
+        }
+        # 空資料夾（只有 .git、.claude 也算）：新開發走開案、改既有倉庫先檢查工具再下載，不用等使用者講出「開案」
         $hint = '這是空資料夾，裝有 ai-os 外掛（給新專案用的開發規則）。依使用者第一則訊息判斷：' +
                 '①要開發新的東西（網站、App、工具、腳本等），不論有沒有說「開案」→ 先用 ai-os:start-project 技能，不直接寫程式。' +
                 '②要修改既有的 GitHub 倉庫 → 先照 ai-os:env-setup 技能第〇節「檢查與安裝」做完（要重開就停），再把它下載到這個資料夾本身（git clone <網址> .；資料夾不是全空時改用 git init、git remote add origin <網址>、git pull origin <預設分支>），不要開案；' +
-                '下載後有 _管理/常駐/此次任務.md → 讀完 ${CLAUDE_PLUGIN_ROOT}/rules.md 全文並照它做，做完提醒使用者之後開新對話規則會自動載入；' +
-                '沒有 → 告訴使用者這個倉庫不歸 ai-os 管，可以直接改，或輸入 /ai-os:adopt 改由 ai-os 管理，讓他選。' +
+                "下載後有 _管理/常駐/此次任務.md → 讀完 $root\rules.md 全文並照它做，做完提醒使用者之後開新對話規則會自動載入；" +
+                '沒有 → ' + $offer +
                 '③其他（問問題、看檔案、使用者說不用開案）→ 照常回答。'
-        $hint = $hint.Replace('${CLAUDE_PLUGIN_ROOT}', (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
-        @{
-            hookSpecificOutput = @{
-                hookEventName     = 'SessionStart'
-                additionalContext = $hint
-            }
-        } | ConvertTo-Json -Depth 5 -Compress
+        Send-Hint $hint
         exit 0
     }
-    # E-2：用舊範本複製開的專案有自己的規則書（CLAUDE.md）與閘門，不再送新規則，避免兩套規則打架
-    if (Test-Path -LiteralPath (Join-Path $proj '_開發檔案/scripts/hooks/verify-gate.ps1')) { exit 0 }
+    # E-2：用舊範本複製開的專案有自己的規則書（CLAUDE.md）與閘門，不再送新規則，避免兩套規則打架；改問要不要轉成外掛管理
+    if (Test-Path -LiteralPath (Join-Path $proj '_開發檔案/scripts/hooks/verify-gate.ps1')) {
+        if (-not (Test-Declined $proj)) { Send-Hint ('這個資料夾是舊版 AI OS 範本專案（自帶規則書）。' + $existingHint.Substring($existingHint.IndexOf('使用者第一則'))) }
+        exit 0
+    }
     $isAiOs = $true
 
     $rulesPath = Join-Path $PSScriptRoot '..\rules.md'
