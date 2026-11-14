@@ -1,6 +1,6 @@
 ﻿# PostToolUse hook：偵測到「驗證類指令」執行過，就寫下標記檔
 #
-# 搭配 verify-gate.ps1 實現「原則四（Evidence over claims）」的技術層閘門。
+# 搭配 verify-gate.ps1 實現「驗證過才能說完成」的技術層閘門。
 # 本腳本只記錄「跑過了」，不解析輸出——解析各技術棧輸出
 # 脆弱且會誤擋。PostToolUse 只在指令成功（exit 0）時觸發，所以失敗的驗證本來就不會留下標記（2026-10-18 實測）。
 #

@@ -1,6 +1,6 @@
 ﻿# PreToolUse hook：git commit 前檢查「程式碼變更是否已驗證」
 #
-# 「原則四（Evidence over claims）」的技術層閘門。
+# 「驗證過才能說完成」的技術層閘門。
 # git push 不攔（使用者為 Vibe Coding，要求 AI 直接推，2026-10-15）。
 #
 # ── 設計原則（動手改前務必先讀）──────────────────────────────
@@ -142,11 +142,11 @@ try {
         $files = ($code | Select-Object -First 8) -join ', '
         if ($code.Count -gt 8) { $files += " …（共 $($code.Count) 檔）" }
 
-        $reason = "🛡️ 原則四閘門（Evidence over claims）：本次要 commit 的內容含程式碼變更（$files），" +
-                  "但自該內容產生後**未執行任何驗證指令**。`n" +
+        $reason = "存檔把關：本次要 commit 的內容含程式碼變更（$files），" +
+                  "但自該內容產生後未執行任何驗證指令。`n" +
                   "請先實跑建置／型別檢查／測試（指令依 STACK_RULES，如 npm run build、npx tsc --noEmit、npx playwright test），" +
                   "確認輸出無誤後再 commit——並把實跑指令與輸出摘要寫進 `此次任務.md` 的「上次完成時填寫」欄。`n" +
-                  "⚠️ 正解是**重跑驗證**，不是改用 git commit -am。"
+                  "正解是重跑驗證，不是改用 git commit -am。"
 
         @{
             hookSpecificOutput = @{

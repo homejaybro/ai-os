@@ -19,7 +19,7 @@ description: ai-os 專案要寫常駐檔（此次任務、專案規格、方案�
 
 共用的規則、技能、子 Agent、commit 閘門與格式範本都在外掛（`${CLAUDE_PLUGIN_ROOT}`），不放進專案。`${CLAUDE_PLUGIN_ROOT}/templates/forms/` 的範本永遠不直接填。
 
-根層只有：`CLAUDE.md`（本專案專屬的補充）、`.gitignore`、`.mcp.json`、`playwright.config.ts`，以及 `.claude/`、`.github/`。程式碼依 STACK_RULES 放置；不在這張表裡的資料夾不要自己新增。改檔名或搬資料夾要全庫搜尋舊路徑一起改（原則三）。
+根層只有：`CLAUDE.md`（本專案專屬的補充）、`.gitignore`、`.mcp.json`、`playwright.config.ts`，以及 `.claude/`、`.github/`。程式碼依 STACK_RULES 放置；不在這張表裡的資料夾不要自己新增。改檔名或搬資料夾要全庫搜尋舊路徑一起改。
 
 ## 二、常駐檔寫入規則
 
