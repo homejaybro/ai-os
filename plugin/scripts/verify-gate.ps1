@@ -52,13 +52,19 @@ try {
     #      同段（中間無 ;/&/|），不管前面加了什麼指令
     if ($cmd -notmatch '\bgit\b[^;&|]*\bcommit\b') { exit 0 }
 
-    # H2（2026-11-14）：每段（&& 分隔）要「以驗證工具開頭」才算；裝套件、看版本、--if-present 不算
+    # H2（2026-11-14）：每段（&& 分隔）要「以驗證工具開頭」才算；看版本、只列清單、--if-present、背景 & 不算
     function Test-Verify([string]$s) {
         $s = $s.Trim()
-        if ($s -match '(^|\s)(install|add|uninstall|i|ci)(\s|$)|--version|--help|--if-present') { return $false }
-        $s = $s -replace '^(npx\s+|python3?\s+-m\s+|py\s+-m\s+|uv\s+run\s+)', ''
-        return $s -match ('^((npm|yarn|pnpm)\s+(run\s+)?(build|test|lint|typecheck|check)\b|tsc\b|playwright\s+test\b' +
+        if ($s -match '--version|--help|--if-present|--list\b|--listTests|--collect-only|&\s*$') { return $false }
+        $s = $s -replace '^(\w+=\S+\s+)+', ''                    # 環境變數前綴：CI=1 npm test
+        $s = $s -replace '^rtk\s+(proxy\s+)?', ''                # 其他電腦若裝了 RTK 會加這個前綴
+        $s = $s -replace '^(npx|pnpm\s+(exec|dlx)|yarn\s+dlx|bunx|uv\s+run)\s+', ''
+        $s = $s -replace '^\S*(python3?|py)(\.exe)?\s+-m\s+', ''  # python -m、.venv/Scripts/python -m
+        $s = $s -replace '^(npm|yarn|pnpm|bun)\s+(--prefix\s+\S+\s+|-C\s+\S+\s+|--dir\s+\S+\s+)', '$1 '
+        if ($s -match '^tsc\s+-v\b') { return $false }
+        return $s -match ('^((npm|yarn|pnpm|bun)\s+(run\s+)?(build|test|lint|typecheck|check)\b|tsc\b|playwright\s+test\b' +
                           '|vitest\b|jest\b|mocha\b|node\s+--test\b|pytest\b|py_compile\b|mypy\b|ruff\b|flake8\b' +
+                          '|next\s+(build|lint)\b|vite\s+build\b' +
                           '|cargo\s+(build|test|check|clippy)\b|go\s+(build|test|vet)\b|dotnet\s+(build|test)\b' +
                           '|mvn\s+(compile|test)\b|gradle\s+(build|test)\b)')
     }
@@ -108,7 +114,8 @@ try {
 
     # B-1：git commit -a / -am 會在 commit 當下暫存已追蹤檔的修改
     #      （注意 --amend 是雙破折號，不會誤命中）
-    $usesAllFlag = $cmd -match '(^|\s)-[a-zA-Z]*a[a-zA-Z]*($|\s)'
+    $commitSeg = [regex]::Match($cmdNoQuotes, '\bgit\b[^;&|]*\bcommit\b[^;&|]*').Value
+    $usesAllFlag = $commitSeg -cmatch '(^|\s)-[a-zA-Z]*a[a-zA-Z]*($|\s)'
     # B-8（2026-10-10 實測）：同一指令串「git add a.js; git commit」時，PreToolUse 判斷當下
     #      a.js 還沒暫存 → $staged 為空 → 靜默放行。commit 前的指令串含 git add 時，
     #      連工作區變更與未追蹤檔一起算（寧可多擋，正解是重跑驗證）。

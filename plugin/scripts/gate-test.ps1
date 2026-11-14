@@ -68,6 +68,15 @@ try {
     CheckMark 'M6 驗證接管線 → 不寫'                 'npm test | tail -5'                       $false
     CheckMark 'M7 背景執行 → 不寫'                   'npm test'                                 $false $true
     CheckMark 'M8 commit 訊息提到 pytest → 不寫'     'git commit -m "pytest passed"'            $false
+    CheckMark 'M9 環境變數前綴 → 寫標記'             'CI=1 npm test'                            $true
+    CheckMark 'M10 npm --prefix → 寫標記'            'npm --prefix web test'                    $true
+    CheckMark 'M11 pnpm exec tsc → 寫標記'           'pnpm exec tsc --noEmit'                   $true
+    CheckMark 'M12 虛擬環境 python -m pytest → 寫標記' '.venv/Scripts/python -m pytest'         $true
+    CheckMark 'M13 RTK 前綴 → 寫標記'                'rtk npm run build'                        $true
+    CheckMark 'M14 npm test 參數剛好是 add → 寫標記' 'npm test -- add'                          $true
+    CheckMark 'M15 只列出測試 → 不寫'                'npx playwright test --list'               $false
+    CheckMark 'M16 tsc -v → 不寫'                    'npx tsc -v'                               $false
+    CheckMark 'M17 結尾 & 背景 → 不寫'               'npm test &'                               $false
 
     # 主線：驗證過、標記比程式碼新 → 放行
     Start-Sleep -Milliseconds 1100

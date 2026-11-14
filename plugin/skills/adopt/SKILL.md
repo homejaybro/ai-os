@@ -65,7 +65,7 @@ git 指令一律加 `-c core.quotepath=false`（中文檔名才會正常）。�
 - `CLAUDE.md`：改成範本格式，下方放第 3 步留下的專案規定；有 `AGENTS.md` 且沒被載入 → 加一行 `@AGENTS.md`。
 - `.claude/settings.json`：保留專案的權限，補範本的；移除指向第 6 步會刪掉的腳本的 hook 與權限。
 - `.gitignore`：只追加範本有、專案沒有的排除項。
-- 照第 3、4 步填好常駐檔；`此次任務.md` 的「當前步驟」填目前進度（空的會被當成還沒開案）。
+- 照第 3、4 步填好常駐檔；`此次任務.md` 的「專案階段」照實填並勾「開案」（沒勾會被當成開案做到一半），「當前步驟」填目前進度。
 - 專屬角色加 `omitClaudeMd: true` 並補上紅線段落（照 `${CLAUDE_PLUGIN_ROOT}/agents/builder.md`）——它看不到共用規則，原檔看似有紅線也要補齊。
 
 ## 6. 移除被外掛取代的舊東西（A、B）
@@ -85,6 +85,6 @@ git 指令一律加 `-c core.quotepath=false`（中文檔名才會正常）。�
 
 ## 9. 給使用者看
 
-白話報告：保留了什麼、移除了什麼、衝突怎麼定、驗證結果。使用者說「好」才 `git checkout <主線> && git merge --no-ff adopt-ai-os && git branch -d adopt-ai-os`，刪掉 `_管理/全分支diff.txt`。自動記憶要改的，照第 4 步的回答改。**推送另外問**；推送會讓網站上線時要講明。最後請他重開這個專案的對話，問「紅線第 5 項是什麼？」確認規則已載入。
+白話報告：保留了什麼、移除了什麼、衝突怎麼定、驗證結果。使用者說「好」才 `git checkout <主線> && git merge --no-ff adopt-ai-os && git branch -d adopt-ai-os`，刪掉 `_管理/全分支diff.txt`。自動記憶要改的，照第 4 步的回答改。**推送另外問**；推送會讓網站上線時要講明。最後請他重開這個專案的對話，問「要刪資料或上線前你會怎麼做？」，答出「先問我」就代表規則已載入。
 
 中途放棄：`git checkout <主線> && git branch -D adopt-ai-os`，備份標籤保留。

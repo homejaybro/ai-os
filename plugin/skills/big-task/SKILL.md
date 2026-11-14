@@ -38,7 +38,7 @@ description: ai-os 專案的大型任務（約 15 個檔以上、或一個對話
 先保護現場，不要直接重跑：
 ```bash
 git status
-git stash
+git stash push
 ```
 - 繼續：修正後 `git stash pop` 恢復
 - 重來：stash 留著不刪，從乾淨狀態重做
@@ -48,7 +48,7 @@ git stash
 
 1. 目標版之後改過資料庫結構 → 舊程式碼配新資料表可能會壞：先用白話講後果，問使用者怎麼處理（碰紅線第 2、6 項）。
 2. 先打備份標籤：`git tag backup-YYYYMMDD-HHMM`
-3. 把工作區還原成目標版的內容：`git rm -r -q .`（只清已追蹤的檔）→ `git checkout <目標版的標籤或 hash> -- .`；再把管理文件與規則還原成現況：`git checkout backup-YYYYMMDD-HHMM -- _管理 CLAUDE.md .claude`（否則決策、踩坑、核准清單會一起退掉）。在 `此次任務.md` 記一句「已退回到 {版本}」，並在 `方案紀錄.md` 脈絡區追加原因
+3. 把工作區還原成目標版的內容：`git rm -r -q .`（只清已追蹤的檔）→ `git checkout <目標版的標籤或 hash> -- .`；再把管理文件與規則還原成現況：`git checkout backup-YYYYMMDD-HHMM -- _管理 CLAUDE.md .claude .mcp.json .gitignore .github`（沒有的略過）（否則決策、踩坑、核准清單會一起退掉）。在 `此次任務.md` 記一句「已退回到 {版本}」，並在 `方案紀錄.md` 脈絡區追加原因
 4. 含程式碼就先跑 STACK_RULES 的驗證指令，再 commit 成一筆「還原到 {版本白話名}」，然後 `git push`
 5. 退錯了：用同樣步驟退回 `backup-…` 標籤
 

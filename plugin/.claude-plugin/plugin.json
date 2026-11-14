@@ -1,7 +1,7 @@
 {
   "name": "ai-os",
   "displayName": "AI OS",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "AI OS 開發規則：開案、設計對話、紅線、驗證、存檔把關與子 Agent。ai-os 專案開對話時自動載入共用規則。",
   "author": { "name": "Jay" }
 }
