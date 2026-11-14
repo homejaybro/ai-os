@@ -35,6 +35,8 @@
       "Bash(rtk:*)",
       "Bash(python -m py_compile:*)",
       "Bash(pytest:*)",
+      "Bash(start _產出/草圖/*)",
+      "PowerShell(start _產出/草圖/*)",
       "PowerShell(git status:*)",
       "PowerShell(git diff:*)",
       "PowerShell(git log:*)",
