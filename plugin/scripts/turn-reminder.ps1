@@ -12,8 +12,9 @@ try {
     if (-not (Test-Path -LiteralPath (Join-Path $proj '_管理/常駐/此次任務.md'))) { exit 0 }
     if (Test-Path -LiteralPath (Join-Path $proj '_開發檔案/scripts/hooks/verify-gate.ps1')) { exit 0 }
 
-    $ctx = 'AI OS 收尾規則：做完一件工作時，這一回合最後一則文字用「## 做完了」完成回報並給一個「下一步建議」；' +
-           '還在做或在等使用者時，最後一行寫「你要做的事」；只是回答問題就直接回答。'
+    $ctx = 'AI OS 收尾規則：只是回答問題就直接回答；核准清單內的功能之間寫一行進度就接著做；' +
+           '整個階段或單獨交辦的事做完、或碰到停下條件時，用「## 做完了」完成回報。' +
+           'app 有下一步框時，下一步建議和「你要做的事」只放進框裡；沒有框又在等使用者時，最後一行寫「你要做的事」。'
     @{
         hookSpecificOutput = @{
             hookEventName     = 'UserPromptSubmit'
