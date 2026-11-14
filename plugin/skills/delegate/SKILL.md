@@ -51,5 +51,5 @@ reviewer 不能跑指令，主 Agent 先準備好材料：
 
 ## 沒有適合的角色時
 
-- 別的功能也會需要同類工作（AI 整合、爬蟲、支付…）→ 複製 `${CLAUDE_PLUGIN_ROOT}/agents/builder.md` 改成新角色（改 `name`、`description`、工作內容；保留 `omitClaudeMd: true` 與「需要先回報」那段紅線，它看不到共用規則）。所有 ai-os 專案都用得到 → 放進外掛的 `agents/`；只有這個專案用 → 放專案的 `.claude/agents/`，並在 `_管理/開案確認.md`「子 Agent 組合」登記
+- 別的功能也會需要同類工作（AI 整合、爬蟲、支付…）→ 複製 `${CLAUDE_PLUGIN_ROOT}/agents/builder.md` 改成新角色（改 `name`、`description`、工作內容；保留 `omitClaudeMd: true` 與「需要先回報」那段紅線，它看不到共用規則）。放專案的 `.claude/agents/`，在 `_管理/開案確認.md`「子 Agent 組合」登記，請使用者重開後才能派。不改 `${CLAUDE_PLUGIN_ROOT}` 底下的檔（那是下載的副本，更新會蓋掉）。其他專案也用得到 → 回報時給使用者一句可貼的話，到 ai-os 外掛的資料夾開對話時貼上：「請把 {專案路徑}/.claude/agents/{檔名} 加進外掛的 agents/」
 - 只用這一次 → 用內建 general-purpose 派，prompt 寫清楚只能改哪些檔、哪些事不能做。涉及紅線（安全性、資料庫結構、部署、金流）的工作不用這種方式，改建角色檔
